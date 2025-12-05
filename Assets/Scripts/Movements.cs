@@ -46,7 +46,7 @@ public class Movements : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.A))
         {
-              transform.Rotate(Vector3.forward * -rotateSpeed * Time.fixedDeltaTime);
+              transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
             if (!mainEngine.isPlaying) mainEngine.Play();
 
             rightThrust.Play();
@@ -56,7 +56,7 @@ public class Movements : MonoBehaviour
         {
 
             rb.freezeRotation = true;
-            transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
+            transform.Rotate(Vector3.forward * -rotateSpeed * Time.fixedDeltaTime);
             if (!mainEngine.isPlaying) mainEngine.Play();
 
             leftThrust.Play();

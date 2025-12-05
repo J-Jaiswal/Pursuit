@@ -2,10 +2,7 @@ using UnityEngine;
 
 public class CollisionHandler: MonoBehaviour
 {
-  
-
-    // detecting objects with their tags 
-
+ 
     private void OnCollisionEnter(Collision obj)
     {
         switch (obj.gameObject.tag)
