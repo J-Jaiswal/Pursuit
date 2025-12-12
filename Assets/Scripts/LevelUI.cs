@@ -20,8 +20,8 @@ public class LevelUI : MonoBehaviour
             sideThrust_fuel -= 5f * Time.deltaTime;
         }  
         
-        Debug.Log("Main Thrust Fuel: " + mainThrust_fuel);
-        Debug.Log("Side Thrust Fuel: " + sideThrust_fuel);
+        //Debug.Log("Main Thrust Fuel: " + mainThrust_fuel);
+        //Debug.Log("Side Thrust Fuel: " + sideThrust_fuel);
 
     }
 
