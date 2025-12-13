@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CollisionHandler: MonoBehaviour
 {
@@ -7,7 +8,8 @@ public class CollisionHandler: MonoBehaviour
     [SerializeField] float maxhealth = 15f;
     [SerializeField] float damageRate = 1f;
     [SerializeField] float currentHealth;
-
+    int currentSceneIndex = 0;
+   
     Movements movement;
 
 
@@ -36,12 +38,24 @@ public class CollisionHandler: MonoBehaviour
                 Debug.Log(" Starting point");
                 break;
             case "Finish":
-                Debug.Log(" Complete the level");
+                LoadNextScene(currentSceneIndex);
+                Debug.Log(" Loading next level");
                 break;
             default:
                 Debug.Log(" Rocket crashed");
                 TakeDamge(damageRate);  
                 break;
+        }
+    }
+
+    void LoadNextScene(int sceneIndex)
+    {
+        if ( sceneIndex < 3)
+
+        {
+            LoadNextScene(sceneIndex + 1);
+            currentSceneIndex = sceneIndex +1 ;
+
         }
     }
 
