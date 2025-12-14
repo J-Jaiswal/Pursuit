@@ -7,12 +7,10 @@ public class CollisionHandler: MonoBehaviour
 
     [SerializeField] float maxhealth = 15f;
     [SerializeField] float damageRate = 1f;
-    [SerializeField] float currentHealth;
+    float currentHealth;
     int currentSceneIndex ;
    
     Movements movement;
-
-
     private void Start()
     {
         currentHealth = maxhealth;
@@ -23,11 +21,7 @@ public class CollisionHandler: MonoBehaviour
 
     private void Update()
     {
-        if (currentHealth == 0f)
-        {
-          movement.enabled = false;
-            Debug.Log(" Rocket destroyed");
-        }
+        death();
     }
 
 
@@ -70,12 +64,23 @@ public class CollisionHandler: MonoBehaviour
         }
     }
 
+    void death() { 
+    
+        if ( currentHealth == 0f  )
+
+        {
+             movement.enabled = false;
+            Debug.Log(" Rocket destroyed");
+        }
+    
+    }
     void TakeDamge(float damage)
     {
         if (movement != null)
         {
             currentHealth -= damage;
             currentHealth = Mathf.Clamp(currentHealth, 0f,  maxhealth);
+            Debug.Log($"{currentHealth}");
         }
     }
 }
