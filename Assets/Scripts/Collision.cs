@@ -8,7 +8,7 @@ public class CollisionHandler: MonoBehaviour
     [SerializeField] float maxhealth = 15f;
     [SerializeField] float damageRate = 1f;
     [SerializeField] float currentHealth;
-    int currentSceneIndex = 0;
+    int currentSceneIndex ;
    
     Movements movement;
 
@@ -17,6 +17,7 @@ public class CollisionHandler: MonoBehaviour
     {
         currentHealth = maxhealth;
         movement = GetComponent<Movements>();
+        currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
     }
 
 
@@ -39,7 +40,7 @@ public class CollisionHandler: MonoBehaviour
                 break;
             case "Finish":
                 LoadNextScene(currentSceneIndex);
-                Debug.Log(" Loading next level");
+                //Debug.Log(" Loading next level");
                 break;
             default:
                 Debug.Log(" Rocket crashed");
@@ -50,12 +51,22 @@ public class CollisionHandler: MonoBehaviour
 
     void LoadNextScene(int sceneIndex)
     {
-        if ( sceneIndex < 3)
+       int totalScenes =  SceneManager.sceneCountInBuildSettings;
+
+        
+        if ( sceneIndex < totalScenes)
 
         {
-            LoadNextScene(sceneIndex + 1);
-            currentSceneIndex = sceneIndex +1 ;
+            SceneManager.LoadScene(sceneIndex + 1);
+            //LoadNextScene(sceneIndex + 1);
+            currentSceneIndex = sceneIndex + 1 ;
+            Debug.Log(" Loading next level"); 
 
+
+        }
+        else if ( sceneIndex == totalScenes)
+        {
+            SceneManager.LoadScene(0);
         }
     }
 
