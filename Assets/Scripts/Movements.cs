@@ -14,6 +14,7 @@ public class Movements : MonoBehaviour
 
 
     private Rigidbody rb;
+    CollisionHandler collision;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -28,8 +29,11 @@ public class Movements : MonoBehaviour
 
     void handleThrust ()
     {
+        if (collision.criticalDamage()) { return; }
+
         if (Input.GetKey(KeyCode.Space))
         {
+
             rb.AddRelativeForce(Vector3.up * thrust * Time.fixedDeltaTime);
             if (!mainThrust.isPlaying) mainThrust.Play();
             if (!mainEngine.isPlaying) mainEngine.Play();
@@ -44,9 +48,12 @@ public class Movements : MonoBehaviour
 
     void handleRotation()
     {
+        if (collision.criticalDamage()) { return; }
+
         if (Input.GetKey(KeyCode.A))
         {
-              transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
+            
+            transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
             if (!mainEngine.isPlaying) mainEngine.Play();
 
             rightThrust.Play();

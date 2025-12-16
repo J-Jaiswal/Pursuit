@@ -5,11 +5,11 @@ using UnityEngine.SceneManagement;
 public class CollisionHandler: MonoBehaviour
 {
 
-    [SerializeField] float maxhealth = 15f;
+    [SerializeField] float maxhealth = 10f;
     [SerializeField] float damageRate = 1f;
     float currentHealth;
     int currentSceneIndex ;
-   
+    bool criDamage = false;    
     Movements movement;
     private void Start()
     {
@@ -64,12 +64,20 @@ public class CollisionHandler: MonoBehaviour
         }
     }
 
+    public bool criticalDamage ()
+    {
+        criDamage  = true;
+
+        return criDamage;
+    }
+
     void death() { 
     
         if ( currentHealth == 0f  )
 
         {
              movement.enabled = false;
+            
             Debug.Log(" Rocket destroyed");
         }
     
@@ -79,6 +87,13 @@ public class CollisionHandler: MonoBehaviour
         if (movement != null)
         {
             currentHealth -= damage;
+
+            if(currentHealth < 5f)
+            {
+                criticalDamage();
+                Debug.Log(" Critical Damage");
+             
+            }
             currentHealth = Mathf.Clamp(currentHealth, 0f,  maxhealth);
             Debug.Log($"{currentHealth}");
         }
