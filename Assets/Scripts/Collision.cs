@@ -7,6 +7,7 @@ public class CollisionHandler: MonoBehaviour
 
     [SerializeField] float maxhealth = 10f;
     [SerializeField] float damageRate = 1f;
+    [SerializeField] ParticleSystem crashEffect;
     float currentHealth;
     int currentSceneIndex ;
     bool criDamage = false;    
@@ -27,6 +28,7 @@ public class CollisionHandler: MonoBehaviour
 
     private void OnCollisionEnter(Collision obj)
     {
+        ContactPoint contact = obj.contacts[0];
         switch (obj.gameObject.tag)
         {
             case "Start":
@@ -38,6 +40,7 @@ public class CollisionHandler: MonoBehaviour
                 break;
             default:
                 Debug.Log(" Rocket crashed");
+                Instantiate(crashEffect, contact.point, Quaternion.LookRotation(contact.normal));
                 TakeDamge(damageRate);  
                 break;
         }
@@ -46,10 +49,8 @@ public class CollisionHandler: MonoBehaviour
     void LoadNextScene(int sceneIndex)
     {
        int totalScenes =  SceneManager.sceneCountInBuildSettings;
-
-        
+ 
         if ( sceneIndex < totalScenes)
-
         {
             SceneManager.LoadScene(sceneIndex + 1);
             //LoadNextScene(sceneIndex + 1);

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Movements : MonoBehaviour
 {
-
-
     [SerializeField] private float thrust = 1500f;
     [SerializeField] private float rotateSpeed = 100f;
     [SerializeField] ParticleSystem leftThrust ;
@@ -27,7 +25,7 @@ public class Movements : MonoBehaviour
     }
 
 
-    void handleThrust ()
+    void handleThrust()
     {
         if (collision.criticalDamage()) { return; }
 
@@ -35,13 +33,13 @@ public class Movements : MonoBehaviour
         {
 
             rb.AddRelativeForce(Vector3.up * thrust * Time.fixedDeltaTime);
-            if (!mainThrust.isPlaying) mainThrust.Play();
-            if (!mainEngine.isPlaying) mainEngine.Play();
+            if (mainThrust != null && !mainThrust.isPlaying) mainThrust.Play();
+            if (mainEngine != null && !mainEngine.isPlaying) mainEngine.Play();
         }
         else
         {
-            if (mainThrust.isPlaying) mainThrust.Stop();
-            if (mainEngine.isPlaying) mainEngine.Stop();
+            if (mainThrust != null && mainThrust.isPlaying) mainThrust.Stop();
+            if (mainEngine != null && mainEngine.isPlaying) mainEngine.Stop();
         }
 
     }
@@ -54,7 +52,7 @@ public class Movements : MonoBehaviour
         {
             
             transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
-            if (!mainEngine.isPlaying) mainEngine.Play();
+            if ( mainEngine != null && !mainEngine.isPlaying) mainEngine.Play();
 
             rightThrust.Play();
           
@@ -64,7 +62,7 @@ public class Movements : MonoBehaviour
 
             rb.freezeRotation = true;
             transform.Rotate(Vector3.forward * -rotateSpeed * Time.fixedDeltaTime);
-            if (!mainEngine.isPlaying) mainEngine.Play();
+            if (mainEngine != null && !mainEngine.isPlaying) mainEngine.Play();
 
             leftThrust.Play();
             rb.freezeRotation = false;
