@@ -9,6 +9,9 @@ public class Movements : MonoBehaviour
     [SerializeField] ParticleSystem rightThrust;
     [SerializeField] ParticleSystem mainThrust;
     [SerializeField] AudioSource mainEngine;
+    float maxThrust = 1500f;    
+    float currentThrust = 0f;
+    float thrustSmoothing = 3f;
 
 
     private Rigidbody rb;
@@ -16,23 +19,39 @@ public class Movements : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        collision = GetComponent<CollisionHandler>();
+        rb.freezeRotation = true;
     }
 
     private void FixedUpdate()
     {
-        handleThrust();
-        handleRotation();
+
+        if ( collision != null && collision.criticalDamage()) {
+            rb.freezeRotation = false;
+            Debug.Log("Critical Damage - No Movement");
+        } else {
+            handleThrust();
+            handleRotation();
+        }
+        
     }
 
 
     void handleThrust()
     {
-        if (collision.criticalDamage()) { return; }
+
+        
+        float targetThrust = Input.GetKey(KeyCode.Space) ? maxThrust : 0f;
+     
+        currentThrust = Mathf.Lerp(currentThrust , targetThrust , Time.fixedDeltaTime * thrustSmoothing);
+        rb.AddRelativeForce(Vector3.up * currentThrust * Time.fixedDeltaTime);
+
+
+    
 
         if (Input.GetKey(KeyCode.Space))
         {
 
-            rb.AddRelativeForce(Vector3.up * thrust * Time.fixedDeltaTime);
             if (mainThrust != null && !mainThrust.isPlaying) mainThrust.Play();
             if (mainEngine != null && !mainEngine.isPlaying) mainEngine.Play();
         }
@@ -46,7 +65,7 @@ public class Movements : MonoBehaviour
 
     void handleRotation()
     {
-        if (collision.criticalDamage()) { return; }
+
 
         if (Input.GetKey(KeyCode.A))
         {
@@ -60,13 +79,11 @@ public class Movements : MonoBehaviour
         else if (Input.GetKey(KeyCode.D))
         {
 
-            rb.freezeRotation = true;
             transform.Rotate(Vector3.forward * -rotateSpeed * Time.fixedDeltaTime);
             if (mainEngine != null && !mainEngine.isPlaying) mainEngine.Play();
 
             leftThrust.Play();
-            rb.freezeRotation = false;
-
+          
         }
         else
         {

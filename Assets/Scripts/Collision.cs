@@ -10,7 +10,7 @@ public class CollisionHandler: MonoBehaviour
     [SerializeField] ParticleSystem crashEffect;
     float currentHealth;
     int currentSceneIndex ;
-    bool criDamage = false;    
+    //bool criDamage = false;    
     Movements movement;
     private void Start()
     {
@@ -67,9 +67,12 @@ public class CollisionHandler: MonoBehaviour
 
     public bool criticalDamage ()
     {
-        criDamage  = true;
-
-        return criDamage;
+        bool returnDamage = false ;
+        if ( currentHealth < 5f )
+        {
+            returnDamage = true;
+        }   
+        return returnDamage;
     }
 
     void death() { 
@@ -83,6 +86,8 @@ public class CollisionHandler: MonoBehaviour
         }
     
     }
+
+  
     void TakeDamge(float damage)
     {
         if (movement != null)
