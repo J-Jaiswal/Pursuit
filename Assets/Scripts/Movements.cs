@@ -9,13 +9,16 @@ public class Movements : MonoBehaviour
     [SerializeField] ParticleSystem rightThrust;
     [SerializeField] ParticleSystem mainThrust;
     [SerializeField] AudioSource mainEngine;
+    //[SerializeField] AudioSource sideThrotal;
+
     float maxThrust = 1500f;    
     float currentThrust = 0f;
     float thrustSmoothing = 3f;
 
 
     private Rigidbody rb;
-    CollisionHandler collision;
+    CollisionHandler collision ;
+    
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -42,12 +45,17 @@ public class Movements : MonoBehaviour
 
         
         float targetThrust = Input.GetKey(KeyCode.Space) ? maxThrust : 0f;
-     
+        float healthimapact = collision.HealthEfficency();
+
+        
+        
         currentThrust = Mathf.Lerp(currentThrust , targetThrust , Time.fixedDeltaTime * thrustSmoothing);
-        rb.AddRelativeForce(Vector3.up * currentThrust * Time.fixedDeltaTime);
+
+      
+        rb.AddRelativeForce(Vector3.up * currentThrust*healthimapact * Time.fixedDeltaTime);
 
 
-    
+     
 
         if (Input.GetKey(KeyCode.Space))
         {

@@ -8,9 +8,10 @@ public class CollisionHandler: MonoBehaviour
     [SerializeField] float maxhealth = 10f;
     [SerializeField] float damageRate = 1f;
     [SerializeField] ParticleSystem crashEffect;
+    [SerializeField] AudioSource damageAudio;
+
     float currentHealth;
     int currentSceneIndex ;
-    //bool criDamage = false;    
     Movements movement;
     private void Start()
     {
@@ -22,13 +23,15 @@ public class CollisionHandler: MonoBehaviour
 
     private void Update()
     {
-        death();
+        Death();
     }
 
 
     private void OnCollisionEnter(Collision obj)
     {
         ContactPoint contact = obj.contacts[0];
+
+        crashEffect.transform.position = contact.point;
         switch (obj.gameObject.tag)
         {
             case "Start":
@@ -40,7 +43,7 @@ public class CollisionHandler: MonoBehaviour
                 break;
             default:
                 Debug.Log(" Rocket crashed");
-                Instantiate(crashEffect, contact.point, Quaternion.LookRotation(contact.normal));
+                
                 TakeDamge(damageRate);  
                 break;
         }
@@ -75,19 +78,25 @@ public class CollisionHandler: MonoBehaviour
         return returnDamage;
     }
 
-    void death() { 
+    void Death() { 
     
         if ( currentHealth == 0f  )
 
         {
-             movement.enabled = false;
-            
+             movement.enabled = false;     
             Debug.Log(" Rocket destroyed");
         }
     
     }
 
-  
+    public float HealthEfficency()
+    {
+        float currenthealthPer = currentHealth / maxhealth;
+
+
+        return currenthealthPer;
+
+    }
     void TakeDamge(float damage)
     {
         if (movement != null)
@@ -103,5 +112,7 @@ public class CollisionHandler: MonoBehaviour
             currentHealth = Mathf.Clamp(currentHealth, 0f,  maxhealth);
             Debug.Log($"{currentHealth}");
         }
+       if( crashEffect != null) crashEffect.Play();
+       if( damageAudio != null) damageAudio.Play();
     }
 }
