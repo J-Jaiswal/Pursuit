@@ -46,6 +46,9 @@ public class Movements : MonoBehaviour
         if ( collision != null && collision.currentHealth <= 0 || fuel.currentFuel <= 0  )
         {
             isAlive = false;
+
+            // debug below line to disable movement script on death
+            GameObject.FindFirstObjectByType<Movements>().enabled = false;
         }   
 
         return isAlive;
