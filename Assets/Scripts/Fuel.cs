@@ -7,7 +7,7 @@ public class Fuel : MonoBehaviour
     
      
     float sideBoosterRate = 0.5f;
-    float currentFuel;
+   public float currentFuel;
 
     void Start()
     {

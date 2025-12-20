@@ -10,7 +10,7 @@ public class CollisionHandler: MonoBehaviour
     [SerializeField] ParticleSystem crashEffect;
     [SerializeField] AudioSource damageAudio;
 
-    float currentHealth;
+    public float currentHealth;
     int currentSceneIndex ;
     Movements movement;
     private void Start()

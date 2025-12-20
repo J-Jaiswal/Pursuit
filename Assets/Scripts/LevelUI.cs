@@ -1,27 +1,31 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LevelUI : MonoBehaviour
 {
+    CollisionHandler collisionHandler;
+    Movements movements;
+    Fuel Fuel;
 
-     float mainThrust_fuel = 1500f;
-    float sideThrust_fuel = 100f;
+    [SerializeField] Text rocketHealt;
+    [SerializeField] Text currentFuel;
+    [SerializeField] Text healthEff;
+    [SerializeField] Text currentThrust;
 
 
-
+    private void Awake()
+    {
+        collisionHandler = FindFirstObjectByType<CollisionHandler>();
+        movements = FindFirstObjectByType<Movements>();
+        Fuel = FindFirstObjectByType<Fuel>();
+    }
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Space))
-        {
-            mainThrust_fuel -= 1f * Time.deltaTime;
-        }
-        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
-        {
-            sideThrust_fuel -= 5f * Time.deltaTime;
-        }  
-        
-        //Debug.Log("Main Thrust Fuel: " + mainThrust_fuel);
-        //Debug.Log("Side Thrust Fuel: " + sideThrust_fuel);
+      rocketHealt.text = "Rocket Health: " +  collisionHandler.currentHealth  ;
+        currentFuel.text = "Current Fuel: " + Fuel.currentFuel; 
+        healthEff.text = "Health Efficiency: " + collisionHandler.HealthEfficency();
+        currentFuel.text = "Current Thrust: " + movements.currentThrust;
 
     }
 
