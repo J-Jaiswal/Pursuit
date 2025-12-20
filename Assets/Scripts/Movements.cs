@@ -13,14 +13,17 @@ public class Movements : MonoBehaviour
     float maxThrust = 1500f;    
     public float currentThrust = 0f;
     float thrustSmoothing = 3f;
+    public bool isAlive = true;
 
     Rigidbody rb;
     CollisionHandler collision ;
-    
+    Fuel fuel;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         collision = GetComponent<CollisionHandler>();
+        fuel = GetComponent<Fuel>();
         rb.freezeRotation = true;
     }
 
@@ -29,15 +32,24 @@ public class Movements : MonoBehaviour
 
         if ( collision != null && collision.criticalDamage()) {
             rb.freezeRotation = false;
-            Debug.Log("Critical Damage - No Movement");
+            Debug.Log("Critical Damage ");
         } else {
             handleThrust();
             handleRotation();
         }
-        
+        RockeAlive();
+
     }
 
+    public bool RockeAlive()
+    {
+        if ( collision != null && collision.currentHealth <= 0 || fuel.currentFuel <= 0  )
+        {
+            isAlive = false;
+        }   
 
+        return isAlive;
+    }
     void handleThrust()
     {
 

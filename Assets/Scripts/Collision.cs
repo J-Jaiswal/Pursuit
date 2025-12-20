@@ -13,10 +13,12 @@ public class CollisionHandler: MonoBehaviour
     public float currentHealth;
     int currentSceneIndex ;
     Movements movement;
+    Fuel fuel;
     private void Start()
     {
         currentHealth = maxhealth;
         movement = GetComponent<Movements>();
+        fuel = GetComponent<Fuel>();
         currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
     }
 
@@ -29,6 +31,7 @@ public class CollisionHandler: MonoBehaviour
 
     private void OnCollisionEnter(Collision obj)
     {
+        if( !movement.RockeAlive() ) return;
         ContactPoint contact = obj.contacts[0];
 
         crashEffect.transform.position = contact.point;
@@ -39,7 +42,6 @@ public class CollisionHandler: MonoBehaviour
                 break;
             case "Finish":
                 LoadNextScene(currentSceneIndex);
-                //Debug.Log(" Loading next level");
                 break;
             default:
                 Debug.Log(" Rocket crashed");

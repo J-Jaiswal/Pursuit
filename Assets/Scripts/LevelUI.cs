@@ -12,6 +12,8 @@ public class LevelUI : MonoBehaviour
     [SerializeField] Text currentFuel;
     [SerializeField] Text healthEff;
     [SerializeField] Text currentThrust;
+    [SerializeField] Text death;
+
 
 
     private void Awake()
@@ -19,10 +21,16 @@ public class LevelUI : MonoBehaviour
         collisionHandler = FindFirstObjectByType<CollisionHandler>();
         movements = FindFirstObjectByType<Movements>();
         Fuel = FindFirstObjectByType<Fuel>();
+        death.text = "";
     }
     private void Update()
     {
-      rocketHealt.text = "Rocket Health: " +  collisionHandler.currentHealth  ;
+
+        if (!movements.RockeAlive())
+        {
+            death.text = "Rocket Destroyed! Restarting Level";
+        }
+        rocketHealt.text = "Rocket Health: " +  collisionHandler.currentHealth  ;
         currentFuel.text = "Current Fuel: " + Fuel.currentFuel; 
         healthEff.text = "Health Efficiency: " + collisionHandler.HealthEfficency();
         currentFuel.text = "Current Thrust: " + movements.currentThrust;
