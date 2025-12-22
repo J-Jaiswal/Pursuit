@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,11 +9,11 @@ public class LevelUI : MonoBehaviour
     Movements movements;
     Fuel Fuel;
 
-    [SerializeField] Text rocketHealt;
-    [SerializeField] Text currentFuel;
-    [SerializeField] Text healthEff;
-    [SerializeField] Text currentThrust;
-    [SerializeField] Text death;
+    [SerializeField] TextMeshProUGUI rocketHealth;
+    [SerializeField] TextMeshProUGUI currentFuel;
+    [SerializeField] TextMeshProUGUI healthEff;
+    [SerializeField] TextMeshProUGUI currentThrust;
+    [SerializeField] TextMeshProUGUI death;
 
 
 
@@ -25,15 +26,19 @@ public class LevelUI : MonoBehaviour
     }
     private void Update()
     {
+        if ( !collisionHandler || !movements || !Fuel)
+        {
+            Debug.LogError("Missing component references in LevelUI");
+        }
 
         if (!movements.RockeAlive())
         {
             death.text = "Rocket Destroyed! Restarting Level";
         }
-        rocketHealt.text = "Rocket Health: " +  collisionHandler.currentHealth  ;
+        rocketHealth.text = "Rocket Health: " +  collisionHandler.currentHealth  ;
         currentFuel.text = "Current Fuel: " + Fuel.currentFuel; 
         healthEff.text = "Health Efficiency: " + collisionHandler.HealthEfficency();
-        currentFuel.text = "Current Thrust: " + movements.currentThrust;
+        currentThrust.text = "Current Thrust: " + movements.currentThrust;
 
     }
 
