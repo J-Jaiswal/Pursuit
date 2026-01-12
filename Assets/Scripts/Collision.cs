@@ -14,7 +14,7 @@ public class CollisionHandler: MonoBehaviour
     int currentSceneIndex ;
     Movements movement;
     Fuel fuel;
-    private void Start()
+    private void Awake()
     {
         currentHealth = maxhealth;
         movement = GetComponent<Movements>();

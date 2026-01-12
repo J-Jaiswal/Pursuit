@@ -7,13 +7,13 @@ public class LevelUI : MonoBehaviour
 {
     CollisionHandler collisionHandler;
     Movements movements;
-    Fuel Fuel;
+    Fuel fuel;
 
-    [SerializeField] TextMeshProUGUI rocketHealth;
-    [SerializeField] TextMeshProUGUI currentFuel;
-    [SerializeField] TextMeshProUGUI healthEff;
-    [SerializeField] TextMeshProUGUI currentThrust;
-    [SerializeField] TextMeshProUGUI death;
+    [SerializeField] TMP_Text currentFuel;
+    [SerializeField] TMP_Text healthEff;
+    [SerializeField] TMP_Text currentThrust;
+    [SerializeField] TMP_Text death;
+    [SerializeField] TMP_Text rocketHealth;
 
 
 
@@ -21,27 +21,31 @@ public class LevelUI : MonoBehaviour
     {
         collisionHandler = FindFirstObjectByType<CollisionHandler>();
         movements = FindFirstObjectByType<Movements>();
-        Fuel = FindFirstObjectByType<Fuel>();
-        death.text = "";
+        fuel = FindFirstObjectByType<Fuel>();
+        if (death != null)
+            death.text = "";
+        else
+            Debug.LogError("Death TextMeshPro is not assigned!");
     }
     private void Update()
     {
-        if ( !collisionHandler || !movements || !Fuel)
+        if (!collisionHandler || !movements || !fuel ||
+       !rocketHealth || !death)
         {
-            Debug.LogError("Missing component references in LevelUI");
+        
+            return;
         }
+        Debug.Log("Rocket Active " + movements.RockeAlive());
 
         if (!movements.RockeAlive())
         {
             death.text = "Rocket Destroyed! Restarting Level";
         }
-        rocketHealth.text = "Rocket Health: " +  collisionHandler.currentHealth  ;
-        currentFuel.text = "Current Fuel: " + Fuel.currentFuel; 
+        rocketHealth.text = "Rocket Health: " +  collisionHandler.currentHealth.ToString();
+        currentFuel.text = "Current Fuel: " + fuel.currentFuel;
         healthEff.text = "Health Efficiency: " + collisionHandler.HealthEfficency();
         currentThrust.text = "Current Thrust: " + movements.currentThrust;
 
     }
-
-
 
 }
