@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Movements : MonoBehaviour
 {
-    [SerializeField] private float thrust = 1500f;
     [SerializeField] private float rotateSpeed = 100f;
+    [SerializeField] private float thrust = 2000f;
     [SerializeField] ParticleSystem leftThrust ;
     [SerializeField] ParticleSystem rightThrust;
     [SerializeField] ParticleSystem mainThrust;
     [SerializeField] AudioSource mainEngine;
 
-    float maxThrust = 1500f;    
+    public float maxThrust = 1500f;    
     public float currentThrust = 0f;
     float thrustSmoothing = 3f;
     public bool isAlive = true;
@@ -19,6 +19,10 @@ public class Movements : MonoBehaviour
     CollisionHandler collision ;
     Fuel fuel;
 
+    private void Awake()
+    {
+        currentThrust = maxThrust;
+    }
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -47,7 +51,10 @@ public class Movements : MonoBehaviour
         {
             isAlive = false;
 
-            // debug below line to disable movement script on death
+            if (mainThrust != null && mainThrust.isPlaying) mainThrust.Stop();
+            if (mainEngine != null && mainEngine.isPlaying) mainEngine.Stop();
+            if (leftThrust.isPlaying) leftThrust.Stop();
+            if (rightThrust.isPlaying) rightThrust.Stop();
             GameObject.FindFirstObjectByType<Movements>().enabled = false;
         }   
 
@@ -55,15 +62,15 @@ public class Movements : MonoBehaviour
     }
     void handleThrust()
     {
+        if(!RockeAlive()) return;   
 
-        
         float targetThrust = Input.GetKey(KeyCode.Space) ? maxThrust : 0f;
         float healthimapact = collision.HealthEfficency();   
         currentThrust = Mathf.Lerp(currentThrust , targetThrust , Time.fixedDeltaTime * thrustSmoothing);
   
         rb.AddRelativeForce(Vector3.up * currentThrust*healthimapact * Time.fixedDeltaTime);
 
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) )
         {
 
             if (mainThrust != null && !mainThrust.isPlaying) mainThrust.Play();
@@ -79,7 +86,8 @@ public class Movements : MonoBehaviour
 
     void handleRotation()
     {
-        if (Input.GetKey(KeyCode.A))
+        if (!RockeAlive()) return;  
+        if (Input.GetKey(KeyCode.A) )
         {
             
             transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);

@@ -5,18 +5,18 @@ using UnityEngine.SceneManagement;
 public class CollisionHandler: MonoBehaviour
 {
 
-    [SerializeField] float maxhealth = 10f;
     [SerializeField] float damageRate = 1f;
     [SerializeField] ParticleSystem crashEffect;
     [SerializeField] AudioSource damageAudio;
 
+     public float maxHealth = 10f;
     public float currentHealth;
     int currentSceneIndex ;
     Movements movement;
     Fuel fuel;
     private void Awake()
     {
-        currentHealth = maxhealth;
+        currentHealth = maxHealth;
         movement = GetComponent<Movements>();
         fuel = GetComponent<Fuel>();
         currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
@@ -93,7 +93,7 @@ public class CollisionHandler: MonoBehaviour
 
     public float HealthEfficency()
     {
-        float currenthealthPer = currentHealth / maxhealth;
+        float currenthealthPer = currentHealth / maxHealth;
 
 
         return currenthealthPer;
@@ -111,7 +111,7 @@ public class CollisionHandler: MonoBehaviour
                 Debug.Log(" Critical Damage");
              
             }
-            currentHealth = Mathf.Clamp(currentHealth, 0f,  maxhealth);
+            currentHealth = Mathf.Clamp(currentHealth, 0f,  maxHealth);
             Debug.Log($"{currentHealth}");
         }
        if( crashEffect != null) crashEffect.Play();

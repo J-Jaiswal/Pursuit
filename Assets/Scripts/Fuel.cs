@@ -2,13 +2,17 @@ using UnityEngine;
 
 public class Fuel : MonoBehaviour
 {
-    [SerializeField] float maxfuel = 10f;
-    [SerializeField] float burnRate;
-    
-     
+    [SerializeField] float burnRate = 5;
     float sideBoosterRate = 0.5f;
-     public float currentFuel;
+    
+    public float maxfuel = 50f;
+    public float currentFuel;
 
+
+    private void Awake()
+    {
+        currentFuel = maxfuel;  
+    }
     void Start()
     {
       currentFuel = maxfuel;
