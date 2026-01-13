@@ -14,12 +14,6 @@ public class LevelUI : MonoBehaviour
     [SerializeField] Slider fuelBar;
     [SerializeField] Slider thrustBar;
 
-    //float currentHealth;
-    //float currentThrust;
-    //float currentFuel;  
-
-
-
     private void Awake()
     {
         collisionHandler = FindFirstObjectByType<CollisionHandler>();
@@ -31,10 +25,6 @@ public class LevelUI : MonoBehaviour
         {
             Debug.LogError("Death TextMeshPro is not assigned!");
         }
-
-        //currentFuel = collisionHandler.currentHealth;   
-        //currentHealth = fuel.currentFuel;   
-        //currentThrust = movements.currentThrust;    
 
     }
     private void Update()
