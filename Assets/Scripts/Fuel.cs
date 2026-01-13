@@ -5,17 +5,17 @@ public class Fuel : MonoBehaviour
     [SerializeField] float burnRate = 5;
     float sideBoosterRate = 0.5f;
     
-    public float maxfuel = 50f;
+    public float maxFuel = 50f;
     public float currentFuel;
 
 
     private void Awake()
     {
-        currentFuel = maxfuel;  
+        currentFuel = maxFuel;  
     }
     void Start()
     {
-      currentFuel = maxfuel;
+      currentFuel = maxFuel;
     }
 
     void Update()
@@ -33,7 +33,7 @@ public class Fuel : MonoBehaviour
                 currentFuel -= burnRate * sideBoosterRate;
                 Debug.Log("(Side thrust)Current Fuel: " + currentFuel);
             }
-          currentFuel = Mathf.Clamp(currentFuel, 0, maxfuel);
+          currentFuel = Mathf.Clamp(currentFuel, 0, maxFuel);
            
         }
 

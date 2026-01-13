@@ -1,25 +1,26 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IndicatorBar : MonoBehaviour
+public class EngineThrustBar : MonoBehaviour
 {
-    Slider slider;
-    CollisionHandler collisionHandler;
     [SerializeField] Gradient gradient;
     [SerializeField] Image fill;
+    Slider slider;
+    Movements movements;
+  
     void Start()
     {
-        collisionHandler = FindFirstObjectByType<CollisionHandler>();  
         slider = GetComponent<Slider>();
-        
+        movements = FindFirstObjectByType<Movements>();
+
         fill.color = gradient.Evaluate(1f); 
 
     }
 
     void Update()
     {
-        
-        slider.value = collisionHandler.currentHealth / collisionHandler.maxHealth;
+        slider.value = movements.currentThrust / movements.maxThrust;
+
         fill.color = gradient.Evaluate(slider.normalizedValue); 
 
     }

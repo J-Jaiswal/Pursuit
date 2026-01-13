@@ -10,9 +10,9 @@ public class LevelUI : MonoBehaviour
 
     [SerializeField] TMP_Text healthEff;
     [SerializeField] TMP_Text death;
-    [SerializeField] Slider healthBar;
-    [SerializeField] Slider fuelBar;
-    [SerializeField] Slider thrustBar;
+    //[SerializeField] Slider healthBar;
+    //[SerializeField] Slider fuelBar;
+    //[SerializeField] Slider thrustBar;
 
     private void Awake()
     {
@@ -38,25 +38,9 @@ public class LevelUI : MonoBehaviour
         healthEff.text = "Health Efficiency: " + collisionHandler.HealthEfficency();
 
 
-        HealthBar(collisionHandler.currentHealth, collisionHandler.maxHealth);  
-        FuelBar(fuel.currentFuel, fuel.maxfuel); 
-        ThrustBar(movements.currentThrust, movements.maxThrust);  
     }
 
 
-    public void HealthBar ( float currentHealth , float MaxHealth)
-    {
-        healthBar.value = currentHealth / MaxHealth;
-    } 
-    
-    public void FuelBar ( float currentFuel , float MaxFuel)
-    {
-        fuelBar.value = currentFuel / MaxFuel;
-    }
-
-    public void ThrustBar ( float currentThrust , float MaxThrust)
-    {
-        thrustBar.value = currentThrust / MaxThrust;
-    }   
+   
 
 }
