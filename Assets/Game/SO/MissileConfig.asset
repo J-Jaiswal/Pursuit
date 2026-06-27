@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a06942d85773e9349847c3f24294c74e, type: 3}
+  m_Name: MissileConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MissileConfigSO
+  baseSpeed: 6
+  minSpeed: 2
+  maxSpeed: 10
+  spawnDelay: 1
+  catchRadius: 1
+  catchDamage: 100
+  catchCooldown: 1
+  crashRecoveryTime: 2.5
+  blastRadius: 5
+  blastDamage: 20
+  farThreshold: 40
+  closeThreshold: 12
+  gracePeriodAfterRespawn: 5
+  respawnBehindDistance: 40
+  tightCorridorThreshold: 8
+  cornerTrapDwellTime: 3
+  cornerTrapMovementThreshold: 5
+  wallAvoidanceRayLength: 5
+  holdSpeedMultiplier: 1
+  surgeSpeedMultiplier: 1.8
+  retreatSpeedMultiplier: 1.2
+  cornerTrapSpeedMultiplier: 1.4
+  holdWallAvoidance: 1
+  surgeWallAvoidance: 0.6
+  stalkWallAvoidance: 1.2
+  retreatWallAvoidance: 1
+  cornerTrapWallAvoidance: 0.8
