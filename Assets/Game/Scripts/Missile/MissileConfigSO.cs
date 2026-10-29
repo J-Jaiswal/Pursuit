@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Per-level missile tuning parameters. Create one asset per level via
-/// Assets > Create > Config > MissileConfig and assign to the MissileAI component.
-/// </summary>
 [CreateAssetMenu(fileName = "MissileConfig", menuName = "Config/MissileConfig")]
 public class MissileConfigSO : ScriptableObject
 {
@@ -15,10 +11,16 @@ public class MissileConfigSO : ScriptableObject
     [Header("Spawn")]
     [SerializeField] private float spawnDelay = 10f;
 
-    [Header("Catch")]
-    [SerializeField] private float catchRadius = 3f;
-    [SerializeField] private float catchDamage = 40f;
-    [SerializeField] private float catchCooldown = 1.5f;
+    [Header("Catch & Detonation")]
+    [SerializeField] private float catchRadius = 2.5f;
+    [SerializeField] private float catchCooldown = 0.1f;
+
+    [Header("Attack Behavior")]
+    [SerializeField] private float attackRange = 10f;
+
+    [Header("VFX / SFX")]
+    [SerializeField] private GameObject explosionVFXPrefab;
+    [SerializeField] private AudioClip explosionSFX;
 
     [Header("Wall Hit")]
     [SerializeField] private float crashRecoveryTime = 2.5f;
@@ -29,12 +31,6 @@ public class MissileConfigSO : ScriptableObject
     [SerializeField] private float farThreshold = 40f;
     [SerializeField] private float closeThreshold = 12f;
 
-    [Header("Respawn")]
-    [SerializeField] private float gracePeriodAfterRespawn = 5f;
-    [SerializeField] private float respawnBehindDistance = 40f;
-
-    [Header("Corridor Detection")]
-    [SerializeField] private float tightCorridorThreshold = 8f;
 
     [Header("Corner Trap")]
     [SerializeField] private float cornerTrapDwellTime = 3f;
@@ -72,16 +68,15 @@ public class MissileConfigSO : ScriptableObject
     public float MaxSpeed => maxSpeed;
     public float SpawnDelay => spawnDelay;
     public float CatchRadius => catchRadius;
-    public float CatchDamage => catchDamage;
     public float CatchCooldown => catchCooldown;
+    public float AttackRange => attackRange;
+    public GameObject ExplosionVFXPrefab => explosionVFXPrefab;
+    public AudioClip ExplosionSFX => explosionSFX;
     public float CrashRecoveryTime => crashRecoveryTime;
     public float BlastRadius => blastRadius;
     public float BlastDamage => blastDamage;
     public float FarThreshold => farThreshold;
     public float CloseThreshold => closeThreshold;
-    public float GracePeriodAfterRespawn => gracePeriodAfterRespawn;
-    public float RespawnBehindDistance => respawnBehindDistance;
-    public float TightCorridorThreshold => tightCorridorThreshold;
     public float CornerTrapDwellTime => cornerTrapDwellTime;
     public float CornerTrapMovementThreshold => cornerTrapMovementThreshold;
     public float WallAvoidanceRayLength => wallAvoidanceRayLength;

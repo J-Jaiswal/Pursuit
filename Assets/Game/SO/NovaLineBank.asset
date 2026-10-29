@@ -1,0 +1,255 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dd8c57798dc3c44ab8f954db8a8f4e1, type: 3}
+  m_Name: NovaLineBank
+  m_EditorClassIdentifier: Assembly-CSharp::NovaLineBankSO
+  spawn:
+    categoryName: spawn
+    clips:
+    - {fileID: 8300000, guid: 057fd2357f71f024d94ef7fd2f5514d4, type: 3}
+    - {fileID: 8300000, guid: 91acfc3f7bcc56a41971028fd35776c1, type: 3}
+    - {fileID: 8300000, guid: 493a28d747e9c054b9f93f6c04516b60, type: 3}
+    - {fileID: 8300000, guid: 85ac65318b0a795468a33778515dff0b, type: 3}
+    - {fileID: 8300000, guid: 28be339fa1be2d548946be2833af7c65, type: 3}
+    - {fileID: 8300000, guid: d47fed33e1e70d94c8b1f1bf4f3f8af8, type: 3}
+    - {fileID: 8300000, guid: 67a32726b9661df459d29d5781804384, type: 3}
+    - {fileID: 8300000, guid: e58a338191aacf64d84924c12e1a077e, type: 3}
+    subtitles:
+    - The hunt has begun.
+    - Acquiring lock. You cannot hide here.
+    - Engine hot. Pursuit trajectory calculated.
+    - Run as fast as you want.
+    - Target acquired. Commencing intercept.
+    - I remember every mistake you made.
+    - Your head start means nothing.
+    - Vector locked. No escape in these caves.
+    lastPickedIndex: 4
+  proximityClose:
+    categoryName: proximityClose
+    clips:
+    - {fileID: 8300000, guid: 570ee3bf8d74126478601ad28e72760c, type: 3}
+    - {fileID: 8300000, guid: 7741e2d135cef2a49bcc8b25bb5692ad, type: 3}
+    - {fileID: 8300000, guid: b6307ebf2589def49bea7a1fa46d9c2c, type: 3}
+    - {fileID: 8300000, guid: c44c3a82e6488274887e84ee71520242, type: 3}
+    - {fileID: 8300000, guid: ef0e7cb9f3470474d937c3a3e7802648, type: 3}
+    - {fileID: 8300000, guid: 064f86f886fe0f74687ef1fd70c3d25c, type: 3}
+    - {fileID: 8300000, guid: e73bec5fe228c3343bd0aad9c0b4848d, type: 3}
+    - {fileID: 8300000, guid: d677455f27625a5479746cf04f773b75, type: 3}
+    - {fileID: 8300000, guid: a042dd276b76800408a8462319dae5ca, type: 3}
+    - {fileID: 8300000, guid: d04db725dbc6ca045918702fc818a42c, type: 3}
+    subtitles:
+    - Right behind you.
+    - I can smell your exhaust.
+    - Almost touching your hull.
+    - Nowhere left to turn.
+    - Check your rearview, pilot.
+    - End of the line.
+    - Your shields will not save you.
+    - Say goodbye.
+    - I have you now.
+    - Brace for impact.
+    lastPickedIndex: 5
+  caught:
+    categoryName: caught
+    clips:
+    - {fileID: 8300000, guid: 7e85b972ff51b3b45828f8421c1adf03, type: 3}
+    - {fileID: 8300000, guid: 4b5762ff9c0086b4990b11faa6e3fb6d, type: 3}
+    - {fileID: 8300000, guid: 64f7cdef054894241b74ae3d726b332e, type: 3}
+    - {fileID: 8300000, guid: 7957f9be0e953ab44aa82b7e91a2e057, type: 3}
+    - {fileID: 8300000, guid: 5cf6b0b210f7d8e4eac88119aec574b9, type: 3}
+    - {fileID: 8300000, guid: 272beb1024e5225458cd4f80ecf7e7c8, type: 3}
+    - {fileID: 8300000, guid: 4929959a38b0051478d35f3c108611ea, type: 3}
+    - {fileID: 8300000, guid: d4a90ff0f3075a64c836e8a28b187c2c, type: 3}
+    subtitles:
+    - Target destroyed.
+    - Impact confirmed. Complete annihilation.
+    - Did you think you could outrun me?
+    - Clean detonation. Nothing left.
+    - Your vessel is scrap metal.
+    - Calculation complete. Absolute kill.
+    - Scratch one pilot.
+    - Direct hit. Mission accomplished.
+    lastPickedIndex: 6
+  died_missile:
+    categoryName: died_missile
+    clips:
+    - {fileID: 8300000, guid: a14dd668b96129c4393c3bc809bb9a47, type: 3}
+    - {fileID: 8300000, guid: 4b7b464f6a1662f4d927ee6f29d9123c, type: 3}
+    - {fileID: 8300000, guid: ac9251b5785aa444480edab9abcde4e6, type: 3}
+    - {fileID: 8300000, guid: f0cb60089f23f76409dd62f83d62b054, type: 3}
+    - {fileID: 8300000, guid: bbc8fa6eadac27647b9e13860a622a42, type: 3}
+    - {fileID: 8300000, guid: f1ae7dbe021e1164eb14406ff621942c, type: 3}
+    subtitles:
+    - You were too slow.
+    - An inevitable conclusion.
+    - Predictable evasive maneuvers
+    - You belong to the void now.
+    - A futile struggle.
+    - Reduced to floating debris.
+    lastPickedIndex: -1
+  died_laser:
+    categoryName: died_laser
+    clips:
+    - {fileID: 8300000, guid: 0bcf31823adf49a4fa4079d7f750b8ca, type: 3}
+    - {fileID: 8300000, guid: 39d7e55cec8af4641b2fa9aec772d3dc, type: 3}
+    - {fileID: 8300000, guid: f6c84535060e6ea46b520afa5b59fc8a, type: 3}
+    - {fileID: 8300000, guid: 253898d8a6191f144a76b088e618ce54, type: 3}
+    - {fileID: 8300000, guid: 5da2fe27cfedccc4688cc560e9a1c143, type: 3}
+    - {fileID: 8300000, guid: 4b1e5f415541d754a9da9461c6d88140, type: 3}
+    subtitles:
+    - Blinded by the beams. Careless.
+    - Sliced apart before I reached you.
+    - Security lasers did my job.
+    - Did you not see the grid?
+    - Vaporized by basic defenses.
+    - The cave was smarter than you.
+    lastPickedIndex: -1
+  died_crusher:
+    categoryName: died_crusher
+    clips:
+    - {fileID: 8300000, guid: 410c51785c87bee419854adcd91b1d11, type: 3}
+    - {fileID: 8300000, guid: 12a0c2cd504f63a40ae96ecb12be577e, type: 3}
+    - {fileID: 8300000, guid: bc84e8da9cfba7248bc6ac51b35d111f, type: 3}
+    - {fileID: 8300000, guid: 38d47b58df8cc354fae1b2105ab2c0c5, type: 3}
+    - {fileID: 8300000, guid: 45c59d1283066774887eb6c0c3b4b325, type: 3}
+    - {fileID: 8300000, guid: 26ee61db690db5741adb73bf10e974d9, type: 3}
+    subtitles:
+    - The walls crushed you flat.
+    - Compressed into dust.
+    - Hydraulics made quick work of you.
+    - Crushed like an insect.
+    - Pounded into scrap.
+    - No room to maneuver there.
+    lastPickedIndex: -1
+  died_wall:
+    categoryName: died_wall
+    clips:
+    - {fileID: 8300000, guid: 368ecea44a90cd047ac39e31f55c3293, type: 3}
+    - {fileID: 8300000, guid: 858a75f7858539b4a8ccaf541608a167, type: 3}
+    - {fileID: 8300000, guid: 551cd659151481e44998259553ed9b91, type: 3}
+    - {fileID: 8300000, guid: c92d77f4460e7464cbe7fc6f68b51da4, type: 3}
+    - {fileID: 8300000, guid: dc15bf08038700e4fa55365d2ec40bc6, type: 3}
+    - {fileID: 8300000, guid: 35e372279c81182499ab9ee24b753d07, type: 3}
+    subtitles:
+    - Fatal collision. Poor pilot reflexes.
+    - You slammed into the rock.
+    - Panic leads straight to the wall.
+    - Navigation failure. Lethal velocity.
+    - The cave claimed another fool.
+    - You broke against the stone.
+    lastPickedIndex: -1
+  died_overheat:
+    categoryName: died_overheat
+    clips:
+    - {fileID: 8300000, guid: 4e755ba026bdd9d4e9eea28fa45eb9f5, type: 3}
+    - {fileID: 8300000, guid: 80bd492f0a6336e4eb3df66c4abc00a5, type: 3}
+    - {fileID: 8300000, guid: 90226dd1e60a33640a5952590e15e194, type: 3}
+    - {fileID: 8300000, guid: 81da850734b9e4e4d96305b6437ced0d, type: 3}
+    - {fileID: 8300000, guid: 08dbf157ab7034f438e26146bf854348, type: 3}
+    - {fileID: 8300000, guid: cf765a849911b804f8a90a9a95156b28, type: 3}
+    subtitles:
+    - Your own engine cooked you.
+    - Pushed past the redline. Boom
+    - Core meltdown. How desperate.
+    - You burned your own ship.
+    - Thermal limits exceeded. Fatal error.
+    - Incinerated by your own throttle.
+    lastPickedIndex: -1
+  died_fuel:
+    categoryName: died_fuel
+    clips:
+    - {fileID: 8300000, guid: b2a43538411a42448b63f8df301a4a70, type: 3}
+    - {fileID: 8300000, guid: 24704fa049eaa844b9ed0beff52eb7e5, type: 3}
+    - {fileID: 8300000, guid: 5d2df35ff90c8884d8445c9027abbbe0, type: 3}
+    - {fileID: 8300000, guid: c572b34e3f607e6448e49434dd30d596, type: 3}
+    - {fileID: 8300000, guid: 624b45c13d6d03b48b34f6fdf0be8d89, type: 3}
+    - {fileID: 8300000, guid: 0aa98f078a288b044b86d037418b1cda, type: 3}
+    subtitles:
+    - Drifting into the dark forever.
+    - Tanks dry. Suffocating in space."
+    - You starved your thrusters.
+    - Empty tanks. Helpless prey.
+    - Left to rot in the cave.
+    - Silent engines. Cold grave.
+    lastPickedIndex: -1
+  died_generic:
+    categoryName: died_generic
+    clips:
+    - {fileID: 8300000, guid: 33df6218d4263f64a81f755af0a4edad, type: 3}
+    - {fileID: 8300000, guid: f18c88d49478f33499df659f6c45b751, type: 3}
+    - {fileID: 8300000, guid: 138d7fb213213ce4e8de3fdf7b3ba77c, type: 3}
+    - {fileID: 8300000, guid: 8250ac02d057fba49b2f9955a5cb89ea, type: 3}
+    - {fileID: 8300000, guid: 12dddfe4a910967449e4a1e9eb35cbf0, type: 3}
+    - {fileID: 8300000, guid: 26e628f548efda045837362fdb3f09c1, type: 3}
+    subtitles:
+    - Another failed attempt.
+    - Your run ends here.
+    - You never stood a chance.
+    - Substandard pilot performance.
+    - Reset and try again, prey.
+    - Recorded as another casualty.
+    lastPickedIndex: 0
+  surge:
+    categoryName: surge
+    clips:
+    - {fileID: 8300000, guid: 88c8ed6ccc1279f41abd3903ed4cf00b, type: 3}
+    - {fileID: 8300000, guid: 216970f9587e27e4a8981d1e54e90b2c, type: 3}
+    - {fileID: 8300000, guid: c2a931cccf648fe4fad36f9a69fe8d83, type: 3}
+    - {fileID: 8300000, guid: dc1b7d295651d9e4a8b23d8373c15d1c, type: 3}
+    - {fileID: 8300000, guid: 22ff60a4d2bccb94fa051fbe889492f9, type: 3}
+    - {fileID: 8300000, guid: 30bb3138b4e7fb3459fc557236087e0f, type: 3}
+    - {fileID: 8300000, guid: c1a49ac1cdd64494fad44588bbccc614, type: 3}
+    - {fileID: 8300000, guid: 6907a07834966fd428704987b99a957a, type: 3}
+    subtitles:
+    - Burners ignited. Closing the gap.
+    - Maximum acceleration engaged.
+    - Surge active. You are too slow.
+    - Overriding limiters. Here I come
+    - Velocity spiked. Nowhere to run.
+    - Engaging hunt overdrive.
+    - Closing distance rapidly.
+    - Speed increased. Prepare yourself.
+    lastPickedIndex: 2
+  nearFinish:
+    categoryName: nearFinish
+    clips:
+    - {fileID: 8300000, guid: d7d61ec42e170ae4bb95175c2b2a2805, type: 3}
+    - {fileID: 8300000, guid: b6da69acab4b46448b405bf65eac58d6, type: 3}
+    - {fileID: 8300000, guid: 2eb414b6c2b475a4ab1af429bd673721, type: 3}
+    - {fileID: 8300000, guid: e2d6d4af1b4587845bbb48739f690330, type: 3}
+    - {fileID: 8300000, guid: 58735f0a8c879b747a07e3ec6cda5e17, type: 3}
+    - {fileID: 8300000, guid: 6b3662f88df9dab4b9228233bbb0c6e4, type: 3}
+    subtitles:
+    - You will not reach daylight.
+    - So close, yet so dead.
+    - The exit is an illusion.
+    - I will take you at the gate.
+    - You will die at the threshold.
+    - Denying your escape now.
+    lastPickedIndex: -1
+  thirdCrash:
+    categoryName: thirdCrash
+    clips:
+    - {fileID: 8300000, guid: 5361659ae4cabca4097e1a84ad3f0e0b, type: 3}
+    - {fileID: 8300000, guid: 2f5f8a09685025a4292ef122418f759e, type: 3}
+    - {fileID: 8300000, guid: cbc919ae138865e4299a61371110ac02, type: 3}
+    - {fileID: 8300000, guid: 6ca9674c37ee7e644b08f611f8e3bfaa, type: 3}
+    - {fileID: 8300000, guid: fad1b35cbcee1d342b254d8e58e14d25, type: 3}
+    - {fileID: 8300000, guid: 82e8d1b42443d1843a89a070b019fc1c, type: 3}
+    subtitles:
+    - Three impacts. Hull rattling apart.
+    - Losing control, pilot?
+    - Your ship cannot take much more.
+    - Three strikes. You are unsteady.
+    - Fumbling in the dark.
+    - Structural failure is imminent.
+    lastPickedIndex: -1

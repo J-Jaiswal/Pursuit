@@ -39,7 +39,6 @@ public class LLMService : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -53,11 +52,20 @@ public class LLMService : MonoBehaviour
                                float timeoutSeconds, Action<string> onSuccess, Action<string> onFallback,
                                int maxTokensOverride = -1)
     {
-        if (secrets == null || !secrets.HasGroqKey)
+        if (secrets == null)
         {
+            Debug.LogError("[LLMService] [Groq] LLMSecretsSO is NOT assigned to LLMService! Using fallback line.");
             UseFallback(fallbackLines, onFallback);
             return;
         }
+
+        if (!secrets.HasGroqKey)
+        {
+            Debug.LogWarning("[LLMService] [Groq] Groq API key is MISSING in LLMSecretsSO asset! Using fallback line.");
+            UseFallback(fallbackLines, onFallback);
+            return;
+        }
+
         StartCoroutine(GroqCoroutine(systemPrompt, userPrompt, fallbackLines, timeoutSeconds, onSuccess, onFallback, maxTokensOverride));
     }
 
@@ -67,11 +75,27 @@ public class LLMService : MonoBehaviour
     /// </summary>
     public void RequestTTS(string text, string voiceModelId, float timeoutSeconds, Action<AudioClip> onClip)
     {
-        if (secrets == null || !secrets.HasDeepgramKey || string.IsNullOrEmpty(text))
+        if (secrets == null)
         {
+            Debug.LogError("[LLMService] [Deepgram] LLMSecretsSO is NOT assigned! Audio synthesis skipped.");
             onClip?.Invoke(null);
             return;
         }
+
+        if (!secrets.HasDeepgramKey)
+        {
+            Debug.LogWarning("[LLMService] [Deepgram] Deepgram API key is MISSING in LLMSecretsSO asset! Audio synthesis skipped.");
+            onClip?.Invoke(null);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(text))
+        {
+            Debug.LogWarning("[LLMService] [Deepgram] RequestTTS called with empty or null text.");
+            onClip?.Invoke(null);
+            return;
+        }
+
         StartCoroutine(DeepgramCoroutine(text, voiceModelId, timeoutSeconds, onClip));
     }
 
@@ -84,8 +108,11 @@ public class LLMService : MonoBehaviour
         int maxTok = maxTokensOverride > 0 ? maxTokensOverride
                    : (secrets != null ? secrets.MaxTokensOneLiner : 60);
 
-        string requestBody = BuildGroqRequestJson(systemPrompt, userPrompt, maxTok, secrets.GroqModel);
+        string model = secrets != null ? secrets.GroqModel : "openai/gpt-oss-20b";
+        string requestBody = BuildGroqRequestJson(systemPrompt, userPrompt, maxTok, model);
         byte[] bodyBytes   = Encoding.UTF8.GetBytes(requestBody);
+
+        Debug.Log($"[LLMService] [Groq] Sending POST request (Model: {model}, MaxTokens: {maxTok}, Timeout: {timeoutSeconds}s)...");
 
         using UnityWebRequest request = new UnityWebRequest(GroqEndpoint, "POST");
         request.uploadHandler   = new UploadHandlerRaw(bodyBytes);
@@ -97,32 +124,31 @@ public class LLMService : MonoBehaviour
         float startTime = Time.time;
         var operation   = request.SendWebRequest();
 
-        while (!operation.isDone)
-        {
-            if (Time.time - startTime > timeoutSeconds)
-            {
-                request.Abort();
-                UseFallback(fallbackLines, onFallback);
-                yield break;
-            }
-            yield return null;
-        }
+        yield return operation;
+
+        float totalDuration = Time.time - startTime;
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogWarning($"[LLMService] Groq error: {request.error}");
+            string errorBody = request.downloadHandler != null ? request.downloadHandler.text : "No response body";
+            Debug.LogError($"[LLMService] [Groq] Request FAILED in {totalDuration:F2}s — Result: {request.result}, HTTP {request.responseCode} ({request.error}). Details: {errorBody}. Using fallback line.");
             UseFallback(fallbackLines, onFallback);
             yield break;
         }
 
-        string responseText = ParseGroqResponse(request.downloadHandler.text);
+        string rawResponse = request.downloadHandler.text;
+        string responseText = ParseGroqResponse(rawResponse);
+
         if (string.IsNullOrEmpty(responseText))
         {
+            Debug.LogWarning($"[LLMService] [Groq] HTTP 200 received in {totalDuration:F2}s but failed to parse content from response: {rawResponse}. Using fallback line.");
             UseFallback(fallbackLines, onFallback);
         }
         else
         {
-            onSuccess?.Invoke(responseText.Trim());
+            string cleanLine = responseText.Trim();
+            Debug.Log($"[LLMService] [Groq] SUCCESS in {totalDuration:F2}s! Generated line: \"{cleanLine}\"");
+            onSuccess?.Invoke(cleanLine);
         }
     }
 
@@ -135,6 +161,8 @@ public class LLMService : MonoBehaviour
         string jsonBody   = $"{{\"text\":\"{EscapeJsonString(text)}\"}}";
         byte[] bodyBytes  = Encoding.UTF8.GetBytes(jsonBody);
 
+        Debug.Log($"[LLMService] [Deepgram] Requesting TTS audio (Voice: {voiceModelId}, SampleRate: {sampleRate}Hz, Timeout: {timeoutSeconds}s) for text: \"{text}\"");
+
         using UnityWebRequest request = new UnityWebRequest(url, "POST");
         request.uploadHandler   = new UploadHandlerRaw(bodyBytes);
         request.downloadHandler = new DownloadHandlerBuffer();
@@ -145,27 +173,37 @@ public class LLMService : MonoBehaviour
         float startTime = Time.time;
         var   operation = request.SendWebRequest();
 
-        while (!operation.isDone)
-        {
-            if (Time.time - startTime > timeoutSeconds)
-            {
-                request.Abort();
-                onClip?.Invoke(null);
-                yield break;
-            }
-            yield return null;
-        }
+        yield return operation;
+
+        float totalDuration = Time.time - startTime;
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogWarning($"[LLMService] Deepgram TTS error: {request.error}");
+            string errorBody = request.downloadHandler != null ? request.downloadHandler.text : "No response body";
+            Debug.LogError($"[LLMService] [Deepgram] TTS request FAILED in {totalDuration:F2}s — Result: {request.result}, HTTP {request.responseCode} ({request.error}). Details: {errorBody}.");
             onClip?.Invoke(null);
             yield break;
         }
 
-        byte[]    pcmBytes = request.downloadHandler.data;
-        AudioClip clip     = PCMBytesToAudioClip(pcmBytes, sampleRate);
-        onClip?.Invoke(clip);
+        byte[] pcmBytes = request.downloadHandler.data;
+        if (pcmBytes == null || pcmBytes.Length < 2)
+        {
+            Debug.LogError($"[LLMService] [Deepgram] Received invalid or empty PCM audio payload ({pcmBytes?.Length ?? 0} bytes).");
+            onClip?.Invoke(null);
+            yield break;
+        }
+
+        AudioClip clip = PCMBytesToAudioClip(pcmBytes, sampleRate);
+        if (clip != null)
+        {
+            Debug.Log($"[LLMService] [Deepgram] SUCCESS in {totalDuration:F2}s! Created AudioClip (Duration: {clip.length:F2}s, Samples: {clip.samples}, SampleRate: {clip.frequency}Hz).");
+            onClip?.Invoke(clip);
+        }
+        else
+        {
+            Debug.LogError("[LLMService] [Deepgram] Failed to convert PCM bytes into AudioClip.");
+            onClip?.Invoke(null);
+        }
     }
 
     // ── JSON Helpers ──────────────────────────────────────────────────────────
@@ -218,12 +256,26 @@ public class LLMService : MonoBehaviour
 
         int sampleCount = pcmBytes.Length / 2; // 16-bit = 2 bytes per sample
         float[] floatSamples = new float[sampleCount];
+        float maxPeak = 0f;
 
         for (int i = 0; i < sampleCount; i++)
         {
             // Little-endian 16-bit signed int → normalised float
             short sample = (short)(pcmBytes[i * 2] | (pcmBytes[i * 2 + 1] << 8));
-            floatSamples[i] = sample / 32768f;
+            float f = sample / 32768f;
+            floatSamples[i] = f;
+            float abs = Mathf.Abs(f);
+            if (abs > maxPeak) maxPeak = abs;
+        }
+
+        // Peak normalize to 0.95 peak so live lines match pre-baked loudness
+        if (maxPeak > 0.01f)
+        {
+            float normMultiplier = Mathf.Min(0.95f / maxPeak, 3.0f); // cap boost at 3x to avoid amplifying pure noise
+            for (int i = 0; i < sampleCount; i++)
+            {
+                floatSamples[i] = Mathf.Clamp(floatSamples[i] * normMultiplier, -1f, 1f);
+            }
         }
 
         AudioClip clip = AudioClip.Create("TTS_Clip", sampleCount, 1, sampleRate, false);

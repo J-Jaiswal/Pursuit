@@ -1,79 +1,67 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// NOVA — the missile's voice. Attached to the Missile GameObject alongside MissileAI.
-///
-/// Responsibilities:
-///   • Subscribes to RaceContext.OnCommentTrigger for missile-relevant events
-///   • Builds contextual LLM prompts using the live GameStateSnapshot
-///   • Enqueues generated lines (or fallbacks) into CommentaryQueue
-///   • Drives the missile's visual emission pulse while TTS is loading (felt before heard)
-///
-/// Audio: The AudioSource on this GameObject must be configured in the Inspector:
-///   Spatial Blend = 1.0 (full 3D)  |  Max Distance = 60  |  Rolloff = Logarithmic
-///   Doppler Level = 0.5 (slight pitch shift on approach)
-///
-/// SETUP:
-///   1. Add AudioSource to Missile GameObject. Configure 3D settings above.
-///   2. Add a Renderer (e.g., MeshRenderer) and assign to missileRenderer.
-///   3. Enable "Emission" on the missile material.
-///   4. Assign CommentaryQueue and LLMService references.
-/// </summary>
 [RequireComponent(typeof(AudioSource))]
 public class MissileVoice : MonoBehaviour
 {
     [Header("Dependencies")]
     [SerializeField] private CommentaryQueue commentaryQueue;
-    [SerializeField] private LLMService      llmService;
-    [SerializeField] private LLMSecretsSO    secrets;
+    [SerializeField] private LLMService llmService;
+    [SerializeField] private LLMSecretsSO secrets;
+
+    [Header("Pre-baked Lines (Tier 1)")]
+    [Tooltip("Assign the NovaLineBankSO asset here after creating it via Assets > Create > Commentary > Nova Line Bank.")]
+    [SerializeField] private NovaLineBankSO novaLineBank;
+
+    [Header("Audio Tuning")]
+    [Tooltip("3D Spatial Blend: 0.0 = pure 2D radio, 1.0 = pure 3D world position. 0.35 gives clear cockpit radio volume with directional cues.")]
+    [Range(0f, 1f)] [SerializeField] private float spatialBlend = 0.35f;
+    [Tooltip("Minimum distance at which audio plays at 100% volume.")]
+    [SerializeField] private float minAudibleDistance = 15f;
+    [Tooltip("Maximum distance at which audio can be heard.")]
+    [SerializeField] private float maxAudibleDistance = 100f;
+    [Tooltip("Volume multiplier for Nova's voice.")]
+    [Range(0f, 1.5f)] [SerializeField] private float voiceVolume = 1.0f;
 
     [Header("Visual Pulse")]
     [Tooltip("The renderer whose emission intensity pulses while TTS is loading.")]
     [SerializeField] private Renderer missileRenderer;
     [Tooltip("Emission colour at peak pulse intensity.")]
-    [SerializeField] private Color    emissionPulseColor = new Color(1f, 0.3f, 0f); // orange glow
-
-    [Header("Fallback Lines")]
-    [TextArea(2, 4)]
-    [SerializeField] private string[] fallbackLines =
-    {
-        "I'm still here.",
-        "You can't hide in a cave.",
-        "Every turn brings you closer to me.",
-        "Slowing down. Interesting choice.",
-        "I've seen better pilots.",
-    };
+    [SerializeField] private Color emissionPulseColor = new Color(1f, 0.3f, 0f); // orange glow
 
     // ── State ─────────────────────────────────────────────────────────────────
     private AudioSource audioSource;
-    private bool        isLLMCallPending;  // prevents piling up simultaneous LLM requests
-    private bool        isEmissionPulsing;
-    private bool        proximityLineTriggered; // once-per-approach proximity line
+    private bool isEmissionPulsing;
+    private bool proximityLineTriggered; // once-per-approach proximity line
+    private float lastNovaSpokenTime = -100f;
+    private float lastMissileCatchOrDeathTime = -100f;
 
-    // ── System Prompt ─────────────────────────────────────────────────────────
-    private const string SystemPrompt =
-        "You are NOVA — an intelligent hunting missile pursuing a rocket pilot through a cave. " +
-        "You are cold, predatory, precise. Speak in sentences under 8 words. " +
-        "No punctuation except apostrophes. No emojis. No asterisks. " +
-        "Respond with plain text only — one line, nothing else.";
+    // Global clip history — prevents cross-category sonic repeats within last N plays
+    private readonly Queue<string> globalClipHistory = new Queue<string>();
+    private const int GlobalHistorySize = 6;
 
     // ── Unity Lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
-        // Configure 3D audio programmatically as a safety default
-        // (override these in the Inspector for per-level tuning)
-        audioSource.spatialBlend  = 1.0f;
-        audioSource.maxDistance   = 60f;
-        audioSource.rolloffMode   = AudioRolloffMode.Logarithmic;
-        audioSource.dopplerLevel  = 0.5f;
+        if (audioSource != null)
+        {
+            audioSource.spatialBlend = spatialBlend;
+            audioSource.minDistance  = minAudibleDistance;
+            audioSource.maxDistance  = maxAudibleDistance;
+            audioSource.rolloffMode  = AudioRolloffMode.Linear;
+            audioSource.dopplerLevel = 0.2f;
+            audioSource.volume       = voiceVolume;
+            // Ignore listener pause so Nova's death taunt finishes cleanly even on death UI
+            audioSource.ignoreListenerPause = true;
+        }
     }
 
     private void Start()
     {
-        // Register AudioSource with the queue so it can play on this 3D source
+        // Register AudioSource with the queue so it can play on this source
         if (commentaryQueue != null)
             commentaryQueue.RegisterNovaSource(audioSource);
 
@@ -83,26 +71,38 @@ public class MissileVoice : MonoBehaviour
         // Subscribe to race events
         RaceContext.OnCommentTrigger += HandleCommentTrigger;
 
-        // Track proximity once per close approach
-        MissileAI.OnMissileReset += ResetProximityTrigger;
+        // ── TIER 2: COMMENTED OUT FOR CURRENT BUILD ──────────────────────────
+        // ambientTauntCoroutine = StartCoroutine(AmbientTauntLoop());
     }
 
     private void OnDestroy()
     {
         CommentaryQueue.OnNovaTTSLoadingChanged -= HandleNovaTTSLoadingChanged;
-        RaceContext.OnCommentTrigger            -= HandleCommentTrigger;
-        MissileAI.OnMissileReset               -= ResetProximityTrigger;
+        RaceContext.OnCommentTrigger -= HandleCommentTrigger;
+
+        /* TIER 2
+        if (ambientTauntCoroutine != null)
+        {
+            StopCoroutine(ambientTauntCoroutine);
+            ambientTauntCoroutine = null;
+        }
+        */
     }
 
     private void Update()
     {
-        // Once-per-approach proximity line: within 5 units = CRITICAL (overrides cooldown)
-        if (!proximityLineTriggered && MissileAI.Instance != null)
+        // Once-per-approach proximity line (< 5 units = CRITICAL, pre-baked, bypasses cooldown)
+        if (!proximityLineTriggered && MissileAI.Instance != null && MissileAI.Instance.IsActive)
         {
             if (MissileAI.Instance.DistanceToPlayer < 5f)
             {
                 proximityLineTriggered = true;
-                RequestLine(CommentaryQueue.CommentPriority.Critical, "NOVA within 5 units of player");
+                // Don't fire proximity if surge was spoken less than 1.5s ago
+                if (Time.unscaledTime - lastNovaSpokenTime > 1.5f)
+                {
+                    EnqueuePrebakedNova(novaLineBank?.proximityClose, CommentaryQueue.CommentPriority.Critical,
+                                        bypassCooldown: true);
+                }
             }
         }
         else if (MissileAI.Instance != null && MissileAI.Instance.DistanceToPlayer >= 10f)
@@ -112,106 +112,118 @@ public class MissileVoice : MonoBehaviour
         }
     }
 
-    // ── Trigger Handling ──────────────────────────────────────────────────────
+    // ── Trigger Handling (Tier 1 Only) ────────────────────────────────────────
 
     private void HandleCommentTrigger(CommentTrigger trigger, RaceContext.GameStateSnapshot snapshot)
     {
-        CommentaryQueue.CommentPriority priority;
-
         switch (trigger)
         {
+            // ── Tier 1: Critical Catch / Death ─────────────────────────────────
             case CommentTrigger.MissileCaughtPlayer:
-                priority = CommentaryQueue.CommentPriority.Critical;
-                break;
+                // Direct missile contact detonation
+                lastMissileCatchOrDeathTime = Time.unscaledTime;
+                EnqueuePrebakedNova(novaLineBank?.caught, CommentaryQueue.CommentPriority.Critical,
+                                    bypassCooldown: true);
+                return;
+
+            case CommentTrigger.PlayerDied:
+                // If player died from missile detonation and we just fired Caught (< 2.0s ago),
+                // do NOT play a second death line that clobbers the caught taunt.
+                if (snapshot.DeathCause == RaceContext.DeathCause.Missile &&
+                    (Time.unscaledTime - lastMissileCatchOrDeathTime) < 2.0f)
+                {
+                    return;
+                }
+
+                lastMissileCatchOrDeathTime = Time.unscaledTime;
+                var deathPool = novaLineBank != null ? novaLineBank.GetDeathPool(snapshot.DeathCause) : null;
+                EnqueuePrebakedNova(deathPool, CommentaryQueue.CommentPriority.Critical,
+                                    bypassCooldown: true);
+                return;
+
+            // ── Tier 1: High Priority (Pre-baked) ──────────────────────────────
+            case CommentTrigger.MissileSpawnActivated:
+                EnqueuePrebakedNova(novaLineBank?.spawn, CommentaryQueue.CommentPriority.High,
+                                    bypassCooldown: true);
+                return;
 
             case CommentTrigger.MissileSurgeActivated:
-            case CommentTrigger.PlayerNearFinish:
-                priority = CommentaryQueue.CommentPriority.High;
-                break;
+                // Don't surge-taunt if missile is already closer than 7 units (caught/proximity is about to fire)
+                // or if another Nova line fired in the last 2.0s
+                if (MissileAI.Instance != null && MissileAI.Instance.DistanceToPlayer < 7f) return;
+                if (Time.unscaledTime - lastNovaSpokenTime < 2.0f) return;
 
-            case CommentTrigger.MissileRetreatActivated:
-            case CommentTrigger.PlayerCollectedFuel:
-            case CommentTrigger.PlayerCollectedRepair:
+                EnqueuePrebakedNova(novaLineBank?.surge, CommentaryQueue.CommentPriority.High,
+                                    bypassCooldown: true);
+                return;
+
+            case CommentTrigger.PlayerNearFinish:
+                EnqueuePrebakedNova(novaLineBank?.nearFinish, CommentaryQueue.CommentPriority.High,
+                                    bypassCooldown: false);
+                return;
+
+            // ── Tier 1: Normal Priority (Pre-baked) ────────────────────────────
             case CommentTrigger.PlayerOnThirdCrash:
-            case CommentTrigger.PlayerRespawned:
-            case CommentTrigger.PlayerEngineOverheated:
-                priority = CommentaryQueue.CommentPriority.Normal;
-                break;
+                EnqueuePrebakedNova(novaLineBank?.thirdCrash, CommentaryQueue.CommentPriority.Normal,
+                                    bypassCooldown: false);
+                return;
+
+            /* ── TIER 2 (COMMENTED OUT FOR FUTURE BUILD) ────────────────────────
+            case CommentTrigger.PlayerAdvancedPhase:
+                RequestLine(CommentaryQueue.CommentPriority.Normal,
+                            BuildContextDescription(trigger, snapshot));
+                return;
+
+            case CommentTrigger.PlayerEnteredZone:
+                if (snapshot.ZoneSpeakerTarget == CommentaryZoneTrigger.ZoneSpeakerTarget.MissionControlOnly)
+                    return;
+                RequestLine(snapshot.ZoneCommentPriority,
+                            BuildContextDescription(trigger, snapshot));
+                return;
+            ─────────────────────────────────────────────────────────────────── */
 
             default:
-                return; // NOVA doesn't react to fuel/health threshold triggers — that's MC's domain
+                return;
         }
-
-        RequestLine(priority, BuildContextDescription(trigger, snapshot));
     }
 
-    // ── LLM Request ───────────────────────────────────────────────────────────
+    // ── Pre-baked Enqueue ─────────────────────────────────────────────────────
 
-    private void RequestLine(CommentaryQueue.CommentPriority priority, string contextHint)
+    /// <summary>
+    /// Enqueue a Tier 1 pre-baked Nova line.
+    /// Applies the retreat-silence rule for non-Critical lines.
+    /// No-ops if novaLineBank is null or the category has no assigned clips.
+    /// </summary>
+    private void EnqueuePrebakedNova(
+        NovaLineBankSO.LineCategory category,
+        CommentaryQueue.CommentPriority priority,
+        bool bypassCooldown)
     {
-        // NOVA is silent during RETREAT — missile is "stunned" per GDD
-        if (MissileAI.Instance != null
-            && MissileAI.Instance.CurrentBehavior == MissileBehavior.Retreat
-            && priority != CommentaryQueue.CommentPriority.Critical)
+        if (commentaryQueue == null || novaLineBank == null || category == null) return;
+
+        // Activation guard: Nova stays completely silent until the missile is active.
+        // Critical lines (MissileCaughtPlayer, PlayerDied) are exempt — they must always play.
+        if (priority != CommentaryQueue.CommentPriority.Critical &&
+            (MissileAI.Instance == null || !MissileAI.Instance.IsActive))
             return;
 
-        // Don't stack simultaneous LLM calls
-        if (isLLMCallPending && priority != CommentaryQueue.CommentPriority.Critical) return;
-        if (llmService == null || commentaryQueue == null) return;
+        // Retreat-silence guard: missile says nothing non-Critical while retreating
+        if (priority != CommentaryQueue.CommentPriority.Critical &&
+            MissileAI.Instance != null &&
+            MissileAI.Instance.CurrentBehavior == MissileBehavior.Retreat)
+            return;
 
-        isLLMCallPending = true;
-
-        RaceContext.GameStateSnapshot snap = RaceContext.Instance != null
-            ? RaceContext.Instance.BuildSnapshot()
-            : default;
-
-        string userPrompt = BuildUserPrompt(snap);
-        string voiceId    = secrets != null ? secrets.NovaVoiceId : "aura-orion-en";
-
-        llmService.RequestLLMLine(SystemPrompt, userPrompt, fallbackLines, timeoutSeconds: 3f,
-            onSuccess: text =>
-            {
-                isLLMCallPending = false;
-                if (RaceContext.Instance != null) RaceContext.Instance.LastNovaLine = text;
-                commentaryQueue.TryEnqueue(text, CommentaryQueue.CommentSpeaker.Nova, priority, voiceId, ttsTimeout: 2f);
-            },
-            onFallback: text =>
-            {
-                isLLMCallPending = false;
-                commentaryQueue.TryEnqueue(text, CommentaryQueue.CommentSpeaker.Nova, priority, voiceId, ttsTimeout: 2f);
-            });
-    }
-
-    // ── Prompt Builder ────────────────────────────────────────────────────────
-
-    private string BuildUserPrompt(RaceContext.GameStateSnapshot s)
-    {
-        string lastLine = string.IsNullOrEmpty(s.LastNovaLine) ? "none" : s.LastNovaLine;
-
-        return $"Player health: {s.PlayerHealthNormalized * 100f:F0}% | Fuel: {s.PlayerFuelNormalized * 100f:F0}% | Engine Heat: {s.PlayerEngineHeatNormalized * 100f:F0}%\n" +
-               $"Missile distance: {s.MissileDistance:F1} units\n" +
-               $"Level progress: {s.LevelProgress * 100f:F0}%\n" +
-               $"Corridor ahead: {s.CorridorWidthAhead}\n" +
-               $"Player speed: {s.PlayerSpeedTrend}\n" +
-               $"Your current behavior: {s.MissileBehaviorName}\n" +
-               $"Your last line was: \"{lastLine}\"\n" +
-               "Say something in character.";
-    }
-
-    private string BuildContextDescription(CommentTrigger trigger, RaceContext.GameStateSnapshot s)
-    {
-        return trigger switch
+        var (clip, subtitle) = novaLineBank.Pick(category, globalClipHistory, GlobalHistorySize);
+        if (clip == null)
         {
-            CommentTrigger.MissileCaughtPlayer    => "missile just caught the player",
-            CommentTrigger.MissileSurgeActivated  => "surge activated — player is weak",
-            CommentTrigger.MissileRetreatActivated => "retreat — give false hope",
-            CommentTrigger.PlayerCollectedFuel    => "player collected fuel pickup",
-            CommentTrigger.PlayerCollectedRepair  => "player collected repair pickup",
-            CommentTrigger.PlayerOnThirdCrash     => "player crashed for the third time",
-            CommentTrigger.PlayerNearFinish       => "player is near the finish line",
-            CommentTrigger.PlayerRespawned        => "player just respawned at checkpoint",
-            _                                     => "general update",
-        };
+            Debug.LogWarning($"[MissileVoice] [T1] No clip available in pool '{category.categoryName}'. Assign clips in NovaLineBankSO.");
+            return;
+        }
+
+        lastNovaSpokenTime = Time.unscaledTime;
+        commentaryQueue.TryEnqueuePrebaked(clip, subtitle,
+                                            CommentaryQueue.CommentSpeaker.Nova,
+                                            priority, bypassCooldown);
     }
 
     // ── Visual Pulse ──────────────────────────────────────────────────────────
@@ -250,7 +262,96 @@ public class MissileVoice : MonoBehaviour
         missileRenderer.material.SetColor("_EmissionColor", c);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    /* ═══════════════════════════════════════════════════════════════════════════
+       TIER 2 CODE (COMMENTED OUT AS LATENCY IS KILLING THE GAMEPLAY)
+       ═══════════════════════════════════════════════════════════════════════════
+    [Header("Ambient Taunt Timer (Tier 2 — Live LLM)")]
+    [SerializeField] private float ambientTauntIntervalMin = 15f;
+    [SerializeField] private float ambientTauntIntervalMax = 20f;
+    private bool isLLMCallPending;
+    private Coroutine ambientTauntCoroutine;
 
-    private void ResetProximityTrigger() => proximityLineTriggered = false;
+    private const string SystemPrompt =
+        "You are NOVA — an intelligent hunting missile pursuing a rocket pilot through a cave. " +
+        "You are cold, predatory, precise. Speak in sentences under 8 words. " +
+        "No punctuation except apostrophes. No emojis. No asterisks. " +
+        "Respond with plain text only — one line, nothing else.";
+
+    private IEnumerator AmbientTauntLoop()
+    {
+        yield return new WaitForSeconds(5f);
+        while (true)
+        {
+            float interval = Random.Range(ambientTauntIntervalMin, ambientTauntIntervalMax);
+            yield return new WaitForSeconds(interval);
+
+            if (MissileAI.Instance == null || !MissileAI.Instance.IsActivePursuing) continue;
+            if (MissileAI.Instance.DistanceToPlayer < 8f) continue;
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.Playing) continue;
+
+            RequestLine(CommentaryQueue.CommentPriority.Normal, BuildAmbientTauntContext());
+        }
+    }
+
+    private string BuildAmbientTauntContext()
+    {
+        var s = RaceContext.Instance != null ? RaceContext.Instance.BuildSnapshot() : default;
+        return $"ambient taunt — attempt {s.attemptCount}, " +
+               $"closest approach this run: {s.ClosestMissileDistance:F1} units, " +
+               $"current behavior: {s.MissileBehaviorName}, " +
+               $"spatial progress: {s.SpatialProgressPercent * 100f:F0}%";
+    }
+
+    private void RequestLine(CommentaryQueue.CommentPriority priority, string contextHint)
+    {
+        if (MissileAI.Instance != null && MissileAI.Instance.CurrentBehavior == MissileBehavior.Retreat
+            && priority != CommentaryQueue.CommentPriority.Critical) return;
+
+        if (isLLMCallPending && priority != CommentaryQueue.CommentPriority.Critical) return;
+        if (llmService == null || commentaryQueue == null) return;
+
+        isLLMCallPending = true;
+        RaceContext.GameStateSnapshot snap = RaceContext.Instance != null ? RaceContext.Instance.BuildSnapshot() : default;
+        string userPrompt = BuildUserPrompt(snap, contextHint);
+        string voiceId = secrets != null ? secrets.NovaVoiceId : "aura-orion-en";
+
+        llmService.RequestLLMLine(SystemPrompt, userPrompt, fallbackLines, timeoutSeconds: 3f,
+            onSuccess: text =>
+            {
+                isLLMCallPending = false;
+                if (RaceContext.Instance != null) RaceContext.Instance.LastNovaLine = text;
+                commentaryQueue.TryEnqueue(text, CommentaryQueue.CommentSpeaker.Nova, priority, voiceId, ttsTimeout: 2f);
+            },
+            onFallback: text =>
+            {
+                isLLMCallPending = false;
+                commentaryQueue.TryEnqueue(text, CommentaryQueue.CommentSpeaker.Nova, priority, voiceId, ttsTimeout: 2f);
+            });
+    }
+
+    private string BuildUserPrompt(RaceContext.GameStateSnapshot s, string contextHint)
+    {
+        string lastLine = string.IsNullOrEmpty(s.LastNovaLine) ? "none" : s.LastNovaLine;
+        string losText = s.MissileHasLineOfSight ? "direct visual line-of-sight" : "hidden behind cave corner";
+        string zoneInfo = !string.IsNullOrEmpty(s.CurrentZoneName) ? $"Player zone: {s.CurrentZoneName} | Your zone: {s.MissileCurrentZoneName}\n" : "";
+
+        return $"Context: {contextHint}\n" + zoneInfo + $"Line of sight: {losText}\n" +
+               $"Player health: {s.PlayerHealthNormalized * 100f:F0}% | Fuel: {s.PlayerFuelNormalized * 100f:F0}% | Engine Heat: {s.PlayerEngineHeatNormalized * 100f:F0}%\n" +
+               $"Current phase: {s.currentPhaseName} (phase {s.phaseNumber} of {s.totalPhases}, attempt {s.attemptCount})\n" +
+               $"Missile distance: {s.MissileDistance:F1} units\n" + $"Spatial progress: {s.SpatialProgressPercent * 100f:F0}%\n" +
+               $"Corridor ahead: {s.CorridorWidthAhead}\n" + $"Player speed: {s.PlayerSpeedTrend}\n" +
+               $"Your current behavior: {s.MissileBehaviorName}\n" + $"Your last line was: \"{lastLine}\"\n" +
+               "Say something in character.";
+    }
+
+    private string BuildContextDescription(CommentTrigger trigger, RaceContext.GameStateSnapshot s)
+    {
+        return trigger switch
+        {
+            CommentTrigger.PlayerAdvancedPhase => $"player advanced to phase '{s.currentPhaseName}' ({s.phaseNumber} of {s.totalPhases})",
+            CommentTrigger.PlayerEnteredZone => $"player entered zone '{s.CurrentZoneName}': {s.ZoneSituationContext}",
+            _ => "general update",
+        };
+    }
+    ═══════════════════════════════════════════════════════════════════════════ */
 }

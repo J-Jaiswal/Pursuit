@@ -1,3 +1,11 @@
+// ══════════════════════════════════════════════════════════════════════════════
+// [DEPRECATED — FULLY DISABLED]
+// PostRaceDebrief has been replaced by the DeathPanel section in UIManager.cs.
+// The LLM-driven debrief flow (TTS, typewriter, NOVA voice line) is no longer used.
+// This file is kept for reference only. All code is commented out below.
+// ══════════════════════════════════════════════════════════════════════════════
+
+/*
 using System;
 using System.Collections;
 using TMPro;
@@ -5,6 +13,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
+/// [DEPRECATED — DISABLED FOR NOW]
+///
 /// Post-run debrief. Triggered on win or loss. Shows race stats, plays a 2-3 sentence
 /// LLM-generated debrief via TTS, and runs a typewriter text effect that syncs with audio.
 ///
@@ -17,7 +27,11 @@ using UnityEngine.UI;
 ///   2. Wire up all serialized UI fields in the Inspector.
 ///   3. Wire up LLMService, LLMSecretsSO references.
 ///   4. Assign Continue and Restart buttons.
+///
+/// NOTE: This component is deprecated. Death screen is now handled by DeathPanel
+/// in UIManager. Level-complete flow returns to the main menu directly.
 /// </summary>
+[System.Obsolete("PostRaceDebrief is deprecated. Death screen is now in UIManager.DeathPanel.")]
 public class PostRaceDebrief : MonoBehaviour
 {
     // ── Singleton ─────────────────────────────────────────────────────────────
@@ -103,7 +117,31 @@ public class PostRaceDebrief : MonoBehaviour
     {
         GameManager.OnPlayerDied    += HandlePlayerDied;
         GameManager.OnLevelComplete += HandleLevelComplete;
+
+        BindButton(restartButton,  OnRestartClicked,  "RestartButton");
+        BindButton(continueButton, OnContinueClicked, "ContinueButton");
     }
+
+    private void BindButton(GameObject buttonGO, UnityEngine.Events.UnityAction callback, string debugName)
+    {
+        if (buttonGO == null)
+        {
+            Debug.LogWarning($"[PostRaceDebrief] {debugName} reference is NULL in Inspector — button will not work.");
+            return;
+        }
+
+        Button btn = buttonGO.GetComponentInChildren<Button>(includeInactive: true);
+        if (btn == null)
+        {
+            Debug.LogWarning($"[PostRaceDebrief] {debugName}: No Button component found on '{buttonGO.name}' or its children.");
+            return;
+        }
+
+        btn.onClick.RemoveListener(callback);
+        btn.onClick.AddListener(callback);
+        Debug.Log($"[PostRaceDebrief] {debugName} bound to '{btn.gameObject.name}'.");
+    }
+
 
     private void OnDestroy()
     {
@@ -142,15 +180,12 @@ public class PostRaceDebrief : MonoBehaviour
             ? RaceContext.Instance.FinalSnapshot
             : default;
 
-        // ── Fade panel in ──────────────────────────────────────────────────
         yield return StartCoroutine(FadePanelIn());
 
-        // ── Display stats ─────────────────────────────────────────────────
         if (statsText   != null) statsText.text   = BuildStatsText(snap, isWin);
         if (speakerLabel != null) speakerLabel.text = isWin ? "MISSION CONTROL" : "N O V A";
         if (debriefText  != null) debriefText.text  = "";
 
-        // ── Request LLM debrief ───────────────────────────────────────────
         string sysPrompt  = isWin ? WinSystemPrompt : LoseSystemPrompt;
         string userPrompt = BuildDebriefPrompt(snap, isWin);
         string[] fallbacks = isWin ? WinFallbacks : LoseFallbacks;
@@ -172,7 +207,6 @@ public class PostRaceDebrief : MonoBehaviour
             llmDone     = true;
         }
 
-        // Wait for LLM (up to 8 seconds — no latency pressure for post-run)
         float elapsed = 0f;
         while (!llmDone && elapsed < 8f)
         {
@@ -183,7 +217,6 @@ public class PostRaceDebrief : MonoBehaviour
         if (string.IsNullOrEmpty(debriefLine))
             debriefLine = fallbacks[UnityEngine.Random.Range(0, fallbacks.Length)];
 
-        // ── TTS + Typewriter simultaneously ───────────────────────────────
         AudioClip debriefClip = null;
         bool      ttsDone     = false;
 
@@ -198,10 +231,8 @@ public class PostRaceDebrief : MonoBehaviour
             ttsDone = true;
         }
 
-        // Start typewriter immediately (doesn't wait for TTS)
         Coroutine typewriterCoroutine = StartCoroutine(TypewriterEffect(debriefLine));
 
-        // Wait for TTS (up to 10 seconds)
         elapsed = 0f;
         while (!ttsDone && elapsed < 10f)
         {
@@ -215,11 +246,9 @@ public class PostRaceDebrief : MonoBehaviour
             debriefAudioSource.Play();
         }
 
-        // Wait for whichever finishes last: audio or typewriter
         float waitForAudio = debriefClip != null ? debriefClip.length : 0f;
         yield return new WaitForSeconds(Mathf.Max(waitForAudio, debriefLine.Length / typewriterSpeed));
 
-        // ── Show buttons ──────────────────────────────────────────────────
         if (continueButton != null) continueButton.SetActive(isWin);
         if (restartButton  != null) restartButton.SetActive(true);
     }
@@ -248,80 +277,67 @@ public class PostRaceDebrief : MonoBehaviour
 
         debriefPanel.SetActive(true);
 
-        Image panelImage = debriefPanel.GetComponent<Image>();
-        if (panelImage != null)
+        CanvasGroup cg = debriefPanel.GetComponent<CanvasGroup>();
+        if (cg == null) yield break;
+
+        cg.alpha = 0f;
+        float t = 0f;
+
+        while (t < panelFadeInDuration)
         {
-            Color color = panelImage.color;
-            float elapsed = 0f;
-            while (elapsed < panelFadeInDuration)
-            {
-                color.a = Mathf.Lerp(0f, 1f, elapsed / panelFadeInDuration);
-                panelImage.color = color;
-                elapsed += Time.deltaTime;
-                yield return null;
-            }
-            color.a = 1f;
-            panelImage.color = color;
+            t        += Time.deltaTime;
+            cg.alpha  = Mathf.Clamp01(t / panelFadeInDuration);
+            yield return null;
         }
-        else
-        {
-            yield return new WaitForSeconds(panelFadeInDuration);
-        }
+
+        cg.alpha = 1f;
     }
 
-    // ── Text Builders ─────────────────────────────────────────────────────────
+    // ── Stats Text Builder ────────────────────────────────────────────────────
 
     private string BuildStatsText(RaceContext.GameStateSnapshot s, bool isWin)
     {
-        string outcome  = isWin ? "LEVEL COMPLETE" : "DESTROYED";
-        int    mm       = Mathf.FloorToInt(s.RaceElapsedTime / 60f);
-        int    ss       = Mathf.FloorToInt(s.RaceElapsedTime % 60f);
+        string result = isWin ? "MISSION COMPLETE\n" : "MISSION FAILED\n";
         string deathStr = isWin ? "—" : FormatDeathCause(s.DeathCause);
-
-        string lines = $"{outcome}\n\n";
-        lines += $"Time:              {mm:D2}:{ss:D2}\n";
-        lines += $"Crashes:           {s.CrashCount}\n";
-        lines += $"Missile catches:   {s.MissileCatchCount}\n";
-        lines += $"Closest distance:  {s.ClosestMissileDistance:F1} units\n";
-
-        if (isWin)
-        {
-            lines += $"Hull remaining:    {s.HealthAtEnd * 100f:F0}%\n";
-            lines += $"Fuel remaining:    {s.FuelAtEnd   * 100f:F0}%\n";
-        }
-        else
-        {
-            lines += $"Cause of death:    {deathStr}\n";
-        }
-
-        return lines;
+        result += $"Phase reached: {s.currentPhaseName} ({s.phaseNumber}/{s.totalPhases})\n";
+        result += $"Attempts: {s.attemptCount}\n";
+        result += $"Cause: {deathStr}\n";
+        result += $"Fuel: {s.playerFuelNormalized * 100f:F0}%\n";
+        result += $"Hull: {s.playerHealthNormalized * 100f:F0}%\n";
+        result += $"Engine: {s.playerEngineHealthNormalized * 100f:F0}%\n";
+        return result;
     }
+
+    // ── Debrief Prompt Builder ────────────────────────────────────────────────
 
     private string BuildDebriefPrompt(RaceContext.GameStateSnapshot s, bool isWin)
     {
-        int mm = Mathf.FloorToInt(s.RaceElapsedTime / 60f);
-        int ss = Mathf.FloorToInt(s.RaceElapsedTime % 60f);
-
-        string prompt = $"outcome: {(isWin ? "win" : "lose")}\n" +
-                        $"level: {s.LevelNumber + 1}\n" +
-                        $"time elapsed: {mm:D2}:{ss:D2}\n" +
-                        $"crash count: {s.CrashCount}\n" +
-                        $"missile catch count: {s.MissileCatchCount}\n" +
-                        $"closest missile distance during run: {s.ClosestMissileDistance:F1} units\n";
-
         if (isWin)
         {
-            prompt += $"fuel remaining: {s.FuelAtEnd   * 100f:F0}%\n" +
-                      $"health remaining: {s.HealthAtEnd * 100f:F0}%\n";
-        }
-        else
-        {
-            prompt += $"cause of death: {FormatDeathCause(s.DeathCause)}\n" +
-                      $"behavior active when player died: {s.MissileBehaviorAtDeath}\n" +
-                      $"fuel at death: {s.FuelAtEnd   * 100f:F0}%\n" +
-                      $"health at death: {s.HealthAtEnd * 100f:F0}%\n";
+            return $"race stats:\n" +
+                   $"phase reached: {s.currentPhaseName} ({s.phaseNumber} of {s.totalPhases})\n" +
+                   $"attempts: {s.attemptCount}\n" +
+                   $"final fuel: {s.playerFuelNormalized * 100f:F0}%\n" +
+                   $"final hull: {s.playerHealthNormalized * 100f:F0}%\n" +
+                   $"final engine: {s.playerEngineHealthNormalized * 100f:F0}%\n";
         }
 
+        string tauntContext = s.DeathCause switch
+        {
+            RaceContext.DeathCause.Missile  => $"Missile closed to kill range, made direct contact, and detonated on the rocket. Direct hit. Player reached {s.currentPhaseName} (Phase {s.phaseNumber} of {s.totalPhases}).",
+            RaceContext.DeathCause.Hazard   => "Rocket destroyed by environmental hazard.",
+            RaceContext.DeathCause.Fuel     => "Rocket ran out of fuel and went dead in space.",
+            RaceContext.DeathCause.Overheat => "Engine overheated and tore the rocket apart.",
+            _                              => "Rocket was destroyed.",
+        };
+
+        string prompt = $"What happened: {tauntContext}\n";
+        prompt += $"cause of death: {FormatDeathCause(s.DeathCause)}\n" +
+                  $"phase reached: {s.currentPhaseName} ({s.phaseNumber}/{s.totalPhases})\n" +
+                  $"attempts: {s.attemptCount}\n" +
+                  $"fuel remaining: {s.playerFuelNormalized * 100f:F0}%\n" +
+                  $"hull remaining: {s.playerHealthNormalized * 100f:F0}%\n" +
+                  $"engine remaining: {s.playerEngineHealthNormalized * 100f:F0}%\n";
         return prompt;
     }
 
@@ -329,10 +345,11 @@ public class PostRaceDebrief : MonoBehaviour
     {
         return cause switch
         {
-            RaceContext.DeathCause.Missile => "caught by missile",
-            RaceContext.DeathCause.Fuel    => "fuel depleted",
-            RaceContext.DeathCause.Hazard  => "hazard collision",
-            _                              => "unknown",
+            RaceContext.DeathCause.Missile   => "caught by missile",
+            RaceContext.DeathCause.Fuel      => "fuel depleted",
+            RaceContext.DeathCause.Hazard    => "hazard collision",
+            RaceContext.DeathCause.Overheat  => "engine overheat",
+            _                               => "unknown",
         };
     }
 
@@ -340,19 +357,35 @@ public class PostRaceDebrief : MonoBehaviour
 
     public void OnContinueClicked()
     {
-        // Hide panel then let GameManager handle scene transition
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance.PlaySFX(SFXType.UIClick);
+        }
+
         if (debriefPanel != null)
         {
             debriefPanel.SetActive(false);
         }
-        // GameManager.waitForDebrief = true by default — we own the scene transition on win
         if (GameManager.Instance != null)
-            GameManager.Instance.LoadNextScene();
+            GameManager.Instance.ReturnToMenu();
     }
 
     public void OnRestartClicked()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        if (SoundEffectsManager.Instance != null)
+        {
+            SoundEffectsManager.Instance.PlaySFX(SFXType.UIClick);
+        }
+
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.ReloadScene();
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        }
     }
 }
+*/

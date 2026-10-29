@@ -12,21 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75d8754a83573cb4c896ced12671bf4c, type: 3}
   m_Name: RocketConfig
   m_EditorClassIdentifier: Assembly-CSharp::RocketConfigSO
-  maxHealth: 100
+  maxRocketHealth: 100
   damageRate: 20
-  maxFuel: 100
+  criticalHealthThreshold: 0.2
+  maxEngineHealth: 100
+  engineCriticalThreshold: 0.2
+  overheatEngineShare: 0.8
+  collisionEngineShare: 0.1
+  wallRecoilForce: 80
+  obstacleRecoilForce: 30
+  maxFuel: 120
   engineBurnRate: 3
   sideBoostBurnRate: 5
-  rotateSpeed: 100
-  thrust: 1000
-  maxThrust: 2500
-  thrustSmoothing: 8
-  criticalHealthThreshold: 0.3
   criticalFuelThreshold: 0.2
-  deathSequenceDuration: 1.5
-  landingSequenceDuration: 1
+  maxThrust: 500
+  thrustSmoothing: 8
+  rotationTorque: 60
+  maxAngularVelocity: 3
   maxHeat: 100
-  heatAccumulationRate: 15
+  heatAccumulationRate: 10
   heatDecayRate: 40
   overheatDamageRate: 15
   overheatWarningThreshold: 0.8
+  deathSequenceDuration: 1.5

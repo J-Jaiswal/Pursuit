@@ -14,11 +14,9 @@ public class GameManager : MonoBehaviour
     public static event Action<GameState> OnStateChanged;
     public static event Action OnPlayerDied;
     public static event Action OnLevelComplete;
-    public static event Action OnMissileCaughtPlayer; // forwarded from MissileAI for clean external subscription
-    public bool MissileDidCatchOnFinalHit { get; set; } // set by RaceContext; read by PostRaceDebrief for debrief cause
-
-    [Tooltip("When true, LevelComplete does NOT auto-load the next scene. PostRaceDebrief.OnContinueClicked() calls LoadNextScene() instead.")]
-    [SerializeField] private bool waitForDebrief = true;
+    public static event Action OnMissileCaughtPlayer;
+    // NOTE: MissileDidCatchOnFinalHit was removed — it was only used by PostRaceDebrief (deprecated).
+    public int MaxPhaseReached { get; set; } = 0;
 
     private GameState currentState = GameState.Playing;
     public GameState CurrentState => currentState;
@@ -31,7 +29,12 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     public void UpdateState(GameState newState)
@@ -40,9 +43,38 @@ public class GameManager : MonoBehaviour
         OnStateChanged?.Invoke(currentState);
     }
 
-    public void PlayerDied()
+    // ── Pause / Resume ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Pauses the game: freezes physics/time and broadcasts Paused state.
+    /// All Update loops that guard on GameState != Playing stop automatically.
+    /// </summary>
+    public void Pause()
     {
         if (currentState != GameState.Playing) return;
+        Time.timeScale = 0f;
+        UpdateState(GameState.Paused);
+    }
+
+    /// <summary>Resumes from pause.</summary>
+    public void Resume()
+    {
+        if (currentState != GameState.Paused) return;
+        Time.timeScale = 1f;
+        UpdateState(GameState.Playing);
+    }
+
+    // ── Player Death ──────────────────────────────────────────────────────────
+
+    public void PlayerDied(RaceContext.DeathCause cause)
+    {
+        if (currentState != GameState.Playing) return;
+
+        if (RaceContext.Instance != null)
+        {
+            RaceContext.Instance.SetDeathCause(cause);
+        }
+
         StartCoroutine(PlayerDiedCoroutine());
     }
 
@@ -51,19 +83,19 @@ public class GameManager : MonoBehaviour
         UpdateState(GameState.Dead);
         OnPlayerDied?.Invoke();
 
-        float duration = config != null ? config.DeathSequenceDuration : 1.5f;
-        yield return new WaitForSeconds(duration);
+        // Small fixed beat so VFX / audio can play before the snapshot is taken.
+        // Note: the fuel-tumble animation waits BEFORE calling PlayerDied, so by
+        // the time we arrive here the tumble is already done. Engine and rocket
+        // deaths are instant — the 0.5s gives explosion particles time to show.
+        yield return new WaitForSeconds(0.5f);
 
-        // Check if level manager checkpoint exists
-        if (LevelManager.Instance != null && LevelManager.Instance.HasCheckpoint)
+        if (RaceContext.Instance != null)
         {
-            LevelManager.Instance.RespawnPlayer();
-        }
-        else
-        {
-            ReloadScene();
+            RaceContext.Instance.CaptureFinalSnapshot();
         }
     }
+
+    // ── Level Complete ────────────────────────────────────────────────────────
 
     public void LevelComplete()
     {
@@ -76,33 +108,31 @@ public class GameManager : MonoBehaviour
         UpdateState(GameState.LevelComplete);
         OnLevelComplete?.Invoke();
 
-        if (!waitForDebrief)
-        {
-            float duration = config != null ? config.LandingSequenceDuration : 1.0f;
-            yield return new WaitForSeconds(duration);
-            LoadNextScene();
-        }
-        // else: PostRaceDebrief.OnContinueClicked() calls LoadNextScene()
+        // Clear this level's checkpoint save so next session starts fresh
+        CheckpointSaveSystem.ResetCheckpoint(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+
         yield break;
     }
 
-    private void ReloadScene()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
+    // ── Scene Loading ─────────────────────────────────────────────────────────
 
-    public void LoadNextScene()
+    /// <summary>
+    /// Returns to the main menu scene (build index 0).
+    /// Use this instead of the old LoadNextScene() for all level-complete and
+    /// post-race navigation in v1 (single-level build).
+    /// </summary>
+    public void ReturnToMenu()
     {
-        int next = SceneManager.GetActiveScene().buildIndex + 1;
-        if (next > SceneManager.sceneCountInBuildSettings - 1) next = 0;
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.LoadScene(next);
+        if (SceneLoader.Instance != null)
+            SceneLoader.Instance.LoadScene("Menu", "Returning to Base...");
+        else
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        // Always restore timeScale — catches carry-over from a paused or slowed state.
+        Time.timeScale = 1f;
         UpdateState(GameState.Playing);
     }
 }

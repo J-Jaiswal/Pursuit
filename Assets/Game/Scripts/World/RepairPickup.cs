@@ -3,26 +3,73 @@ using UnityEngine;
 
 public class RepairPickup : MonoBehaviour
 {
-    [SerializeField] private float repairAmount = 25f;
+    [Header("Visual Effects")]
     [SerializeField] private ParticleSystem collectParticle;
-    [SerializeField] private AudioSource collectAudio;
     [SerializeField] private bool destroyOnCollect = false;
+
+    [Header("Dynamic Idle Animation")]
+    [Tooltip("Enable continuous rotation to make the pickup feel dynamic.")]
+    [SerializeField] private bool enableRotation = true;
+    [Tooltip("Rotation speed in degrees per second.")]
+    [SerializeField] private float rotationSpeed = 90f;
+    [Tooltip("Axis of rotation.")]
+    [SerializeField] private Vector3 rotationAxis = Vector3.up;
+
+    [Tooltip("Enable vertical hovering / bobbing motion.")]
+    [SerializeField] private bool enableBobbing = true;
+    [SerializeField] private float bobAmplitude = 0.12f;
+    [SerializeField] private float bobFrequency = 2f;
 
     private Collider col;
     private Renderer[] renderers;
+    private Vector3 initialPosition;
+    private bool isCollected;
 
     private void Awake()
     {
-        col = GetComponent<Collider>();
+        col       = GetComponent<Collider>();
         renderers = GetComponentsInChildren<Renderer>();
+        initialPosition = transform.position;
+    }
+
+    private void Update()
+    {
+        if (isCollected) return;
+
+        // Dynamic rotation
+        if (enableRotation)
+        {
+            transform.Rotate(rotationAxis * (rotationSpeed * Time.deltaTime), Space.Self);
+        }
+
+        // Dynamic vertical hover bobbing
+        if (enableBobbing)
+        {
+            float newY = initialPosition.y + Mathf.Sin(Time.time * bobFrequency) * bobAmplitude;
+            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        CollisionHandler collisionHandler = other.GetComponentInParent<CollisionHandler>();
-        if (collisionHandler != null && collisionHandler.CompareTag("Player"))
+        if (isCollected) return;
+
+        // Check if the collider belongs to the Player
+        bool isPlayer = other.CompareTag("Player")
+                     || (other.attachedRigidbody != null && other.attachedRigidbody.CompareTag("Player"))
+                     || (other.transform.root != null && other.transform.root.CompareTag("Player"));
+
+        if (!isPlayer) return;
+
+        CollisionHandler collisionHandler = other.GetComponentInParent<CollisionHandler>()
+                                         ?? other.GetComponentInChildren<CollisionHandler>()
+                                         ?? other.GetComponent<CollisionHandler>();
+
+        if (collisionHandler != null)
         {
-            collisionHandler.Repair(repairAmount);
+            isCollected = true;
+            // Full repair: restores BOTH engine HP and rocket HP to 100%.
+            collisionHandler.FullRepair();
             StartCoroutine(CollectSequence());
         }
     }
@@ -46,31 +93,71 @@ public class RepairPickup : MonoBehaviour
 
         // Play feedback
         bool hasParticle = collectParticle != null;
-        bool hasAudio = collectAudio != null;
 
         if (hasParticle)
         {
             collectParticle.Play();
         }
 
-        if (hasAudio)
+        // Play crisp unattenuated pickup sound effect
+        if (SoundEffectsManager.Instance != null)
         {
-            collectAudio.Play();
+            SoundEffectsManager.Instance.PlaySFX(SFXType.RepairPickup);
         }
 
-        // Only delay if there are effects to play
-        if (hasParticle || hasAudio)
+        // Only delay if there are particle effects to finish
+        if (hasParticle)
         {
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(1.5f);
         }
 
-        if (destroyOnCollect)
+        // Always deactivate instead of destroying so the pickup can be restored on checkpoint respawn
+        gameObject.SetActive(false);
+    }
+
+
+    /// Restores the pickup to its initial uncollected state and position,
+    /// re-enabling its collider, renderers, and GameObject.
+
+    public void ResetPickup()
+    {
+        StopAllCoroutines();
+        isCollected = false;
+        transform.position = initialPosition;
+        if (col == null)
         {
-            Destroy(gameObject);
+            col = GetComponent<Collider>();
         }
-        else
+        if (col != null)
         {
-            gameObject.SetActive(false);
+            col.enabled = true;
+        }
+        if (renderers == null || renderers.Length == 0)
+        {
+            renderers = GetComponentsInChildren<Renderer>(true);
+        }
+        if (renderers != null)
+        {
+            foreach (Renderer r in renderers)
+            {
+                if (r != null) r.enabled = true;
+            }
+        }
+        gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// Resets all RepairPickup instances in the active scene (including currently inactive ones).
+    /// </summary>
+    public static void ResetAll()
+    {
+        RepairPickup[] pickups = FindObjectsByType<RepairPickup>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (RepairPickup p in pickups)
+        {
+            if (p != null)
+            {
+                p.ResetPickup();
+            }
         }
     }
 }

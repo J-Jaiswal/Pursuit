@@ -1,0 +1,120 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// NOVA LINE BANK — PRE-BAKED TIER 1 DIALOGUE
+// Voice Target: Deepgram aura-2-hermes-en (or aura-orion-en)
+// Rules: Cold, predatory hunter AI. Under 8 words. Clean enunciation.
+// Format: [category] "Text"
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── SPAWN ───────────────────────────────────────────────────────────────────
+[spawn] "The hunt has begun."
+[spawn] "Acquiring lock. You cannot hide here."
+[spawn] "Engine hot. Pursuit trajectory calculated."
+[spawn] "Run as fast as you want."
+[spawn] "Target acquired. Commencing intercept."
+[spawn] "I remember every mistake you made."
+[spawn] "Your head start means nothing."
+[spawn] "Vector locked. No escape in these caves."
+
+// ── PROXIMITY CLOSE (< 5 units, Critical) ──────────────────────────────────
+[proximityClose] "Right behind you."
+[proximityClose] "I can smell your exhaust."
+[proximityClose] "Almost touching your hull."
+[proximityClose] "Nowhere left to turn."
+[proximityClose] "Check your rearview, pilot."
+[proximityClose] "End of the line."
+[proximityClose] "Your shields will not save you."
+[proximityClose] "Say goodbye."
+[proximityClose] "I have you now."
+[proximityClose] "Brace for impact."
+
+// ── CAUGHT / DIRECT DETONATION (Critical) ──────────────────────────────────
+[caught] "Target destroyed."
+[caught] "Impact confirmed. Complete annihilation."
+[caught] "Did you think you could outrun me?"
+[caught] "Clean detonation. Nothing left."
+[caught] "Your vessel is scrap metal."
+[caught] "Calculation complete. Absolute kill."
+[caught] "Scratch one pilot."
+[caught] "Direct hit. Mission accomplished."
+
+// ── DIED: MISSILE STRIKE ───────────────────────────────────────────────────
+[died_missile] "You were too slow."
+[died_missile] "An inevitable conclusion."
+[died_missile] "Predictable evasive maneuvers."
+[died_missile] "You belong to the void now."
+[died_missile] "A futile struggle."
+[died_missile] "Reduced to floating debris."
+
+// ── DIED: LASER GATE ───────────────────────────────────────────────────────
+[died_laser] "Blinded by the beams. Careless."
+[died_laser] "Sliced apart before I reached you."
+[died_laser] "Security lasers did my job."
+[died_laser] "Did you not see the grid?"
+[died_laser] "Vaporized by basic defenses."
+[died_laser] "The cave was smarter than you."
+
+// ── DIED: HYDRAULIC CRUSHER ────────────────────────────────────────────────
+[died_crusher] "The walls crushed you flat."
+[died_crusher] "Compressed into dust."
+[died_crusher] "Hydraulics made quick work of you."
+[died_crusher] "Crushed like an insect."
+[died_crusher] "Pounded into scrap."
+[died_crusher] "No room to maneuver there."
+
+// ── DIED: WALL CRASH ───────────────────────────────────────────────────────
+[died_wall] "Fatal collision. Poor pilot reflexes."
+[died_wall] "You slammed into the rock."
+[died_wall] "Panic leads straight to the wall."
+[died_wall] "Navigation failure. Lethal velocity."
+[died_wall] "The cave claimed another fool."
+[died_wall] "You broke against the stone."
+
+// ── DIED: OVERHEAT ─────────────────────────────────────────────────────────
+[died_overheat] "Your own engine cooked you."
+[died_overheat] "Pushed past the redline. Boom."
+[died_overheat] "Core meltdown. How desperate."
+[died_overheat] "You burned your own ship."
+[died_overheat] "Thermal limits exceeded. Fatal error."
+[died_overheat] "Incinerated by your own throttle."
+
+// ── DIED: FUEL DEPLETION ───────────────────────────────────────────────────
+[died_fuel] "Drifting into the dark forever."
+[died_fuel] "Tanks dry. Suffocating in space."
+[died_fuel] "You starved your thrusters."
+[died_fuel] "Empty tanks. Helpless prey."
+[died_fuel] "Left to rot in the cave."
+[died_fuel] "Silent engines. Cold grave."
+
+// ── DIED: GENERIC FALLBACK ─────────────────────────────────────────────────
+[died_generic] "Another failed attempt."
+[died_generic] "Your run ends here."
+[died_generic] "You never stood a chance."
+[died_generic] "Substandard pilot performance."
+[died_generic] "Reset and try again, prey."
+[died_generic] "Recorded as another casualty."
+
+// ── SURGE ACTIVATION ───────────────────────────────────────────────────────
+[surge] "Burners ignited. Closing the gap."
+[surge] "Maximum acceleration engaged."
+[surge] "Surge active. You are too slow."
+[surge] "Overriding limiters. Here I come."
+[surge] "Velocity spiked. Nowhere to run."
+[surge] "Engaging hunt overdrive."
+[surge] "Closing distance rapidly."
+[surge] "Speed increased. Prepare yourself."
+
+// ── NEAR FINISH ────────────────────────────────────────────────────────────
+[nearFinish] "You will not reach daylight."
+[nearFinish] "So close, yet so dead."
+[nearFinish] "The exit is an illusion."
+[nearFinish] "I will take you at the gate."
+[nearFinish] "You will die at the threshold."
+[nearFinish] "Denying your escape now."
+
+// ── THIRD CRASH ────────────────────────────────────────────────────────────
+[thirdCrash] "Three impacts. Hull rattling apart."
+[thirdCrash] "Losing control, pilot?"
+[thirdCrash] "Your ship cannot take much more."
+[thirdCrash] "Three strikes. You are unsteady."
+[thirdCrash] "Fumbling in the dark."
+[thirdCrash] "Structural failure is imminent."

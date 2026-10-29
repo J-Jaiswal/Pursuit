@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32941a11066e46d4f81cdead2287d807, type: 3}
+  m_Name: MCLineBank
+  m_EditorClassIdentifier: Assembly-CSharp::MCLineBankSO
+  engineOverheated:
+    categoryName: engineOverheated
+    clips:
+    - {fileID: 8300000, guid: 0e03f70de3a4d944fbef23fd1e250381, type: 3}
+    - {fileID: 8300000, guid: ef53e6c722790b3488c627c258230489, type: 3}
+    - {fileID: 8300000, guid: b18fba17bcbe3b545886a139014478a4, type: 3}
+    - {fileID: 8300000, guid: 7d7ae9d128a14ec4c8d27ada8cefbe77, type: 3}
+    - {fileID: 8300000, guid: 9255c3c96a39ae94eb5667c6a4f64c77, type: 3}
+    - {fileID: 8300000, guid: 5f18b76f71d0e3e4b93f8dc46e98b5db, type: 3}
+    - {fileID: 8300000, guid: 0a9097cac6f49c4419b007f9d9fb25d0, type: 3}
+    - {fileID: 8300000, guid: adb38c70f62d8e949821780d91a0a949, type: 3}
+    subtitles:
+    - Core critical! Cut thrust immediately!
+    - Engine temperature in the red! Vent heat!
+    - Engine taking damage! Release throttle now!
+    - Thermal threshold exceeded! Cool her down!
+    - Core meltdown imminent! Ease off the thrusters!
+    - Engine health failing! Back off the throttle!
+    - Warning! Thruster coils burning out!
+    - Kill the afterburners or we lose you!
+    lastPickedIndex: -1
+  healthCritical:
+    categoryName: healthCritical
+    clips:
+    - {fileID: 8300000, guid: ba1bbedb583acf9439a1a19523180033, type: 3}
+    - {fileID: 8300000, guid: 69a4edbdee19ecb49b821aa84f8a9bfc, type: 3}
+    - {fileID: 8300000, guid: e0be8276631d5e649ba662016ffaa7a1, type: 3}
+    - {fileID: 8300000, guid: 931baf749e244a74983f8b0dbb777147, type: 3}
+    - {fileID: 8300000, guid: 617ac25cb99cfe24ea9d0f7f05b6083d, type: 3}
+    - {fileID: 8300000, guid: cd1f0b87ecb5b8f42876c70e12d27f85, type: 3}
+    - {fileID: 8300000, guid: 1d0b48e8f95b2b24aa9a852212b8279e, type: 3}
+    - {fileID: 8300000, guid: e942a1da1f9b2fb44ae4697500a8574c, type: 3}
+    subtitles:
+    - Hull breach warning! Watch your vectors!
+    - Severe structural damage! One hit will kill!
+    - Hull integrity failing! Find a repair pod!
+    - Multiple hull fractures detected! Fly clean!
+    - Armor depleted! Avoid all contact!
+    - Cockpit pressurized integrity at thirty percent!
+    - Critical hull damage! Do not clip anything!
+    - Ship is breaking apart! Steady your hands!
+    lastPickedIndex: -1
+  missileProximityClose:
+    categoryName: missileProximityClose
+    clips:
+    - {fileID: 8300000, guid: 46ca4c8a8feb9364e9d2500cb26014f9, type: 3}
+    - {fileID: 8300000, guid: a51802f4e95e603498097dffc022c25b, type: 3}
+    - {fileID: 8300000, guid: 439cea0cc42e8624c980e1a83241f265, type: 3}
+    - {fileID: 8300000, guid: f09f278575ab289428f8c649bcdd60b1, type: 3}
+    - {fileID: 8300000, guid: a705e8abd9ad62946882741627d4b100, type: 3}
+    - {fileID: 8300000, guid: 0cc4a82490389da419a7a959ae3b1b86, type: 3}
+    - {fileID: 8300000, guid: 2b1e4e77207f3aa49b5740cb69c6b4f8, type: 3}
+    - {fileID: 8300000, guid: f8caae602be16564f8f76f8f9abe5ba0, type: 3}
+    subtitles:
+    - Bandit right on your tail! Break now!
+    - Missile closing fast! Ten units and dropping!
+    - Proximity alarm screaming! Evade! Evade!
+    - It is right behind you! Punch it!
+    - Hostile in close intercept vector! Shake it
+    - Missile on your six! Hard turn now!
+    - Warning! Imminent missile lock! Break line!
+    - Extreme proximity alert! Evasive maneuvers!
+    lastPickedIndex: -1

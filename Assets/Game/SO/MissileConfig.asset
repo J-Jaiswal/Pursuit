@@ -12,21 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a06942d85773e9349847c3f24294c74e, type: 3}
   m_Name: MissileConfig
   m_EditorClassIdentifier: Assembly-CSharp::MissileConfigSO
-  baseSpeed: 6
+  baseSpeed: 4
   minSpeed: 2
   maxSpeed: 10
-  spawnDelay: 1
+  spawnDelay: 8
   catchRadius: 1
-  catchDamage: 100
-  catchCooldown: 1
-  crashRecoveryTime: 2.5
+  catchCooldown: 1.5
+  attackRange: 10
+  explosionVFXPrefab: {fileID: 5562574936398368765, guid: 2fcf67e46a0859a4aa061fa48fea6a50, type: 3}
+  explosionSFX: {fileID: 8300000, guid: 2be0c226c437fa745a8f86765c455359, type: 3}
+  crashRecoveryTime: 1
   blastRadius: 5
   blastDamage: 20
   farThreshold: 40
   closeThreshold: 12
-  gracePeriodAfterRespawn: 5
-  respawnBehindDistance: 40
-  tightCorridorThreshold: 8
   cornerTrapDwellTime: 3
   cornerTrapMovementThreshold: 5
   wallAvoidanceRayLength: 5

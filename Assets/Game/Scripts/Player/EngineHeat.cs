@@ -65,8 +65,14 @@ public class EngineHeat : MonoBehaviour
             isOverheated = true;
             if (collisionHandler != null)
             {
-                // Deal tick damage over time silently (no metal crash effects on every frame)
-                collisionHandler.TakeDamage(dmgRate * Time.deltaTime, transform.position, playCrashEffect: false);
+                float totalDmg  = dmgRate * Time.deltaTime;
+                float engShare  = config != null ? config.OverheatEngineShare : 0.8f;
+
+                // 80% of overheat damage burns the engine, 20% bleeds into the rocket hull.
+                collisionHandler.TakeDamage(totalDmg, transform.position,
+                                            playCrashEffect: false,
+                                            engineShare: engShare,
+                                            deathCause: RaceContext.DeathCause.EngineFailure);
             }
         }
         else

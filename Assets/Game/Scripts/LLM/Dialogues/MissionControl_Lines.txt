@@ -1,0 +1,56 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// MISSION CONTROL LINE BANK — PRE-BAKED TIER 1 DIALOGUE (40 LINES)
+// Voice Target: Deepgram aura-2-zeus-en (or aura-asteria-en)
+// Rules: Calm, clipped, professional flight controller. Under 8 words. Urgent tension.
+// Format: [category] "Text"
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── 1. FUEL LOW (< 20%) ───────────────────────────────────────────────────
+[fuelLow] "Fuel critical! Twenty percent remaining!"
+[fuelLow] "Warning! Thruster tanks nearing empty!"
+[fuelLow] "Fuel levels dropping fast! Locate supply pods!"
+[fuelLow] "You are running on fumes, pilot!"
+[fuelLow] "Caution! Main propellant reserve compromised!"
+[fuelLow] "Low fuel alarm! Find a canister!"
+[fuelLow] "Check your fuel gauge! Critically low!"
+[fuelLow] "Propellant depletion imminent! Conserve your burns!"
+
+// ── 2. ENGINE OVERHEATED / THERMAL ALERT ──────────────────────────────────
+[engineOverheated] "Core temperature critical! Back off the throttle!"
+[engineOverheated] "Engine in the red! Vent heat immediately!"
+[engineOverheated] "Thermal warning! Thrusters taking continuous damage!"
+[engineOverheated] "Release throttle now! Core meltdown risk!"
+[engineOverheated] "Engine overheating! Ease off the afterburners!"
+[engineOverheated] "Warning! Thruster coils burning out!"
+[engineOverheated] "Cut thrust now or lose the ship!"
+[engineOverheated] "Engine heat critical! Let the cooling cycle!"
+
+// ── 3. HULL INTEGRITY / HEALTH CRITICAL (< 30%) ───────────────────────────
+[healthCritical] "Hull breach warning! Watch your vectors!"
+[healthCritical] "Severe structural damage! One hit will kill!"
+[healthCritical] "Hull integrity failing! Find a repair pod!"
+[healthCritical] "Multiple hull fractures detected! Fly clean!"
+[healthCritical] "Armor depleted! Avoid all contact!"
+[healthCritical] "Cockpit pressurized integrity at thirty percent!"
+[healthCritical] "Critical hull damage! Do not clip anything!"
+[healthCritical] "Ship is breaking apart! Steady your hands!"
+
+// ── 4. MISSILE PROXIMITY CLOSE (10 units Radar Alert) ─────────────────────
+[missileProximityClose] "Bandit right on your tail! Break now!"
+[missileProximityClose] "Missile closing fast! Ten units and dropping!"
+[missileProximityClose] "Proximity alarm screaming! Evade! Evade!"
+[missileProximityClose] "It is right behind you! Punch it!"
+[missileProximityClose] "Hostile in close intercept vector! Shake it!"
+[missileProximityClose] "Missile on your six! Hard turn now!"
+[missileProximityClose] "Warning! Imminent missile lock! Break line!"
+[missileProximityClose] "Extreme proximity alert! Evasive maneuvers!"
+
+// ── 5. LEVEL COMPLETE (Victory Debrief) ───────────────────────────────────
+[levelComplete] "Sector cleared! Outstanding flying, Commander!"
+[levelComplete] "Hostile missile lost! Mission accomplished!"
+[levelComplete] "You made it through! Stellar piloting!"
+[levelComplete] "Telemetry confirmed. Cave exit secured."
+[levelComplete] "Clean extraction! Mission success!"
+[levelComplete] "Hostile neutralized! Welcome back, pilot."
+[levelComplete] "Incredible run, pilot! Stand down."
+[levelComplete] "Exit achieved! You beat the clock!"
